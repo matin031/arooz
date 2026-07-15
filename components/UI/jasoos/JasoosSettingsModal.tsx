@@ -18,19 +18,23 @@ function JasoosSettingsModal({
     new Set([5, 7, 10, maxQuestions].filter((n) => n > 0 && n <= maxQuestions)),
   );
 
-  const [questionCount, setQuestionCount] = useState(countOptions[0] ?? maxQuestions);
+  const [questionCount, setQuestionCount] = useState(
+    countOptions[0] ?? maxQuestions,
+  );
   const [timeMode, setTimeMode] = useState<"unlimited" | "custom">("unlimited");
   const [minutes, setMinutes] = useState(5);
 
-  const validMinutes = Number.isFinite(minutes) && minutes > 0 && minutes <= 180;
-  const canStart = questionCount > 0 && (timeMode === "unlimited" || validMinutes);
+  const validMinutes =
+    Number.isFinite(minutes) && minutes > 0 && minutes <= 180;
+  const canStart =
+    questionCount > 0 && (timeMode === "unlimited" || validMinutes);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="glass rounded-2xl p-6 sm:p-10 text-center"
+      className="glass relative z-20 rounded-2xl p-6 sm:p-10 text-center"
     >
       <h2 className="text-xl sm:text-3xl font-bold mb-8">تنظیمات بازی</h2>
 

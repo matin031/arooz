@@ -129,10 +129,16 @@ function JasoosGame() {
           );
         }
       })
-      .catch((err: unknown) => console.error("jasoos_answers insert threw:", err));
+      .catch((err: unknown) =>
+        console.error("jasoos_answers insert threw:", err),
+      );
   };
 
-  const handleResult = (correct: boolean, spy: SuspectType, chosen: SuspectType) => {
+  const handleResult = (
+    correct: boolean,
+    spy: SuspectType,
+    chosen: SuspectType,
+  ) => {
     logAttempt(level, chosen.role, spy.role, correct);
 
     if (correct) {
@@ -193,7 +199,7 @@ function JasoosGame() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="glass rounded-2xl p-6 sm:p-12 text-center"
+            className="glass relative z-20 rounded-2xl p-6 sm:p-12 text-center"
           >
             <h1 className="text-2xl sm:text-4xl font-bold mb-4 text-primary">
               جاسوسِ نقش‌ها
@@ -201,11 +207,11 @@ function JasoosGame() {
             <p className="text-sm sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed mb-8">
               وارد مدرسه شو. پشتِ هر در، یک بیت و چهار نفر منتظرت هستند؛ هرکدام
               مدعیِ یک نقشِ دستوری یا آرایه‌ی ادبی‌اند. سه نفرشان راست می‌گویند،
-              اما یکی‌شان جاسوس است: نقشی را ادعا می‌کند که در آن بیت اصلاً
-              وجود ندارد. با دقت به بیت نگاه کن، جاسوس را نشانه بگیر و شلیک
-              کن. {START_LIVES} جان داری؛ هر اشتباه یک جان می‌گیرد اما همان
-              پرونده را دوباره امتحان می‌کنی. اگر جان‌هایت تمام شود، از اولِ
-              همین دور شروع می‌کنی.
+              اما یکی‌شان جاسوس است: نقشی را ادعا می‌کند که در آن بیت اصلاً وجود
+              ندارد. با دقت به بیت نگاه کن، جاسوس را نشانه بگیر و شلیک کن.{" "}
+              {START_LIVES} جان داری؛ هر اشتباه یک جان می‌گیرد اما همان پرونده
+              را دوباره امتحان می‌کنی. اگر جان‌هایت تمام شود، از اولِ همین دور
+              شروع می‌کنی
             </p>
             <button
               onClick={() => setScreen("settings")}
@@ -218,7 +224,10 @@ function JasoosGame() {
         )}
 
         {screen === "settings" && (
-          <JasoosSettingsModal maxQuestions={JASOOS_LEVELS.length} onStart={beginRun} />
+          <JasoosSettingsModal
+            maxQuestions={JASOOS_LEVELS.length}
+            onStart={beginRun}
+          />
         )}
 
         {screen === "map" && (
@@ -260,7 +269,9 @@ function JasoosGame() {
             className="glass rounded-2xl p-6 sm:p-12 text-center border-2 border-destructive"
           >
             <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-destructive">
-              {gameOverReason === "time" ? "زمان تمام شد!" : "جان‌هایت تمام شد!"}
+              {gameOverReason === "time"
+                ? "زمان تمام شد!"
+                : "جان‌هایت تمام شد!"}
             </h2>
             {missedSpy && (
               <>
@@ -303,11 +314,11 @@ function JasoosGame() {
             className="glass rounded-2xl p-6 sm:p-12 text-center border-2 border-primary"
           >
             <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-primary">
-              آفرین، جاسوس‌یاب!
+              ! آفرین، جاسوس‌یاب
             </h2>
             <p className="text-sm sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed mb-8">
               تو همه‌ی {runLevels.length} جاسوس را با {lives} جانِ باقی‌مانده
-              پیدا کردی.
+              پیدا کردی
             </p>
             <div className="flex items-center justify-center gap-x-3">
               <button
