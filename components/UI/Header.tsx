@@ -128,6 +128,12 @@ function Header() {
           آغاز یادگیری
         </Link>
         |
+        <Link
+          className=" hover:text-primary transition-all"
+          href={"/final-exam"}
+        >
+          آزمون نهایی
+        </Link>
         <Link className=" hover:text-primary transition-all" href={"/guide"}>
           راهنما
         </Link>
