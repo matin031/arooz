@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import type { PublicFinalExamQuestion } from "@/lib/final-exam-questions";
-import type { GradeResult } from "@/app/api/final-exam/grade/route";
+import type { GradeResult } from "@/lib/exam-ai/engine";
 import BookLoader from "../svgs/LoadingIcon";
 
 type AnsweredEntry = {
@@ -119,9 +119,9 @@ function FinalExam({ questions }: { questions: PublicFinalExamQuestion[] }) {
           </h1>
           <p className="text-muted-foreground leading-8 mb-6">
             در این آزمون به {faNum(questions.length)} سوال تشریحی در سبک امتحان
-            نهایی پاسخ می‌دهید. پاسخ شما توسط هوش مصنوعی با پاسخنامه مقایسه و
-            نمره‌گذاری می‌شود و اگر جایی اشتباه کنید، همان‌جا نکته آموزشی همان
-            مبحث را یاد می‌گیرید.
+            نهایی پاسخ می‌دهید. هوش مصنوعی عروضینو پاسخ شما را همان لحظه با
+            پاسخنامه می‌سنجد، طبق بارم نمره می‌دهد و اگر جایی اشتباه کنید،
+            همان‌جا نکته آموزشی همان مبحث را به شما یاد می‌دهد.
           </p>
           <p className="text-sm text-muted-foreground mb-8">
             مجموع بارم آزمون: {faNum(totalMax)} نمره
@@ -187,7 +187,7 @@ function FinalExam({ questions }: { questions: PublicFinalExamQuestion[] }) {
                 <p className="whitespace-pre-line text-sm leading-7 mb-2">
                   {entry.question.question}
                 </p>
-                <p className="text-sm text-muted-foreground leading-7">
+                <p className="text-sm text-muted-foreground leading-7 whitespace-pre-line">
                   {entry.result.feedback}
                 </p>
               </div>
@@ -275,7 +275,7 @@ function FinalExam({ questions }: { questions: PublicFinalExamQuestion[] }) {
               </button>
               {grading && (
                 <span className="text-sm text-muted-foreground">
-                  هوش مصنوعی در حال مقایسه پاسخ شما با پاسخنامه است...
+                  هوش مصنوعی عروضینو در حال مقایسه پاسخ شما با پاسخنامه است...
                 </span>
               )}
             </div>
@@ -307,10 +307,19 @@ function FinalExam({ questions }: { questions: PublicFinalExamQuestion[] }) {
                 {verdictStyles[currentResult.verdict].label} - نمره{" "}
                 {faNum(currentResult.score)} از {faNum(question.maxScore)}
               </p>
-              <p className="text-sm leading-7 text-foreground/90">
+              <p className="text-sm leading-7 text-foreground/90 whitespace-pre-line">
                 {currentResult.feedback}
               </p>
             </div>
+
+            {currentResult.correctAnswer && (
+              <div className="rounded-xl border border-primary/40 bg-primary/5 p-4 mb-4">
+                <p className="font-medium text-primary mb-2">📝 پاسخنامه</p>
+                <p className="text-sm leading-8 whitespace-pre-line">
+                  {currentResult.correctAnswer}
+                </p>
+              </div>
+            )}
 
             {currentResult.lesson && (
               <div className="rounded-xl border border-accent/50 bg-accent/10 p-4 mb-4">
