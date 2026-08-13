@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import MobileDrawer, { DrawerToggle } from "@/components/UI/MobileDrawer";
 
 const NAV = [
   {
@@ -71,6 +72,25 @@ const NAV = [
       </svg>
     ),
   },
+  {
+    href: "/admin/activity",
+    label: "فعالیت و خطاها",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} className="size-5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h4l2.5-7 4 14 2.5-7H21" />
+      </svg>
+    ),
+  },
+  {
+    href: "/admin/settings",
+    label: "تنظیمات",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} className="size-5">
+        <circle cx="12" cy="12" r="3" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+      </svg>
+    ),
+  },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -79,6 +99,9 @@ function isActive(pathname: string, href: string) {
 
 export default function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const activeLabel = NAV.find((item) => isActive(pathname, item.href))?.label ?? "پنل مدیریت";
 
   return (
     <div dir="rtl" className="flex min-h-screen bg-muted/30">
@@ -125,24 +148,58 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
+        {/* ⚠️ اینجا قبلاً هر هشت بخش به‌صورت آیکونِ بی‌برچسب کنار هم می‌نشستند.
+            سه مشکل داشت: روی گوشیِ کوچک به هم می‌چسبیدند و هدف لمس کمتر از
+            حداقلِ قابل قبول می‌شد، هیچ اسمی دیده نمی‌شد (و tooltip روی لمس
+            اصلاً ظاهر نمی‌شود)، و با اضافه شدن هر بخش تازه بدتر می‌شد. */}
         <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-card/80 px-4 py-3 backdrop-blur md:hidden">
-          <Link href="/admin" className="text-sm font-bold">
-            پنل مدیریت
-          </Link>
-          <nav className="flex gap-1">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex size-9 items-center justify-center rounded-lg ${
-                  isActive(pathname, item.href) ? "bg-primary/15 text-primary" : "text-muted-foreground"
-                }`}
-              >
-                {item.icon}
-              </Link>
-            ))}
-          </nav>
+          <div className="flex min-w-0 flex-col">
+            <Link href="/admin" className="text-sm font-bold">
+              پنل مدیریت
+            </Link>
+            {/* عنوان بخش فعلی: روی موبایل که نوار کناری دیده نمی‌شود، تنها
+                نشانهٔ «کجا هستم» همین است. */}
+            <span className="truncate text-[11px] text-muted-foreground">{activeLabel}</span>
+          </div>
+          <DrawerToggle onClick={() => setDrawerOpen(true)} label="باز کردن منوی مدیریت" />
         </header>
+
+        <MobileDrawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          title="پنل مدیریت"
+        >
+          <nav className="flex flex-col gap-1">
+            {NAV.map((item) => {
+              const active = isActive(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm transition-colors ${
+                    active
+                      ? "bg-primary/15 font-semibold text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <Link
+            href="/"
+            className="mt-3 flex min-h-12 items-center gap-2 rounded-xl border-t border-border px-3 pt-4 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} className="size-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 18 9 12l6-6" />
+            </svg>
+            بازگشت به سایت
+          </Link>
+        </MobileDrawer>
 
         <main className="flex-1">{children}</main>
       </div>
