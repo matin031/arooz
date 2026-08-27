@@ -60,14 +60,23 @@ export function isLessonInBook(number: number): boolean {
 const TITLES: Record<GradeKey, Record<number, string>> = {
   dahom: {},
   yazdahom: { 1: "روباهِ بی‌دست‌وپا" },
-  davazdahom: {},
+  davazdahom: {
+    1: "شکر نعمت",
+    2: "مست و هشیار",
+    3: "آزادی و دفتر زمانه",
+    5: " دماوندیه",
+    6: "نی‌نامه",
+    7: "در حقیقت عشق",
+    10: "فصل شکوفایی",
+    12: "گذر سیاوش از آتش",
+  },
 };
 
 /** Lesson numbers that have content wired up, per grade. */
 const READY: Record<GradeKey, number[]> = {
   dahom: [],
   yazdahom: [1],
-  davazdahom: [],
+  davazdahom: [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18],
 };
 
 function buildLessons(grade: GradeKey): LessonRef[] {
@@ -113,6 +122,17 @@ const CONTENT: Partial<
 > = {
   yazdahom: {
     1: () => import("@/lib/doroos/content/yazdahom-01"),
+  },
+
+  davazdahom: {
+    1: () => import("@/lib/doroos/content/davazdahom-01"),
+    2: () => import("@/lib/doroos/content/davazdahom-02"),
+    3: () => import("@/lib/doroos/content/davazdahom-03"),
+    5: () => import("@/lib/doroos/content/davazdahom-05"),
+    6: () => import("@/lib/doroos/content/davazdahom-06"),
+    7: () => import("@/lib/doroos/content/davazdahom-07"),
+    10: () => import("@/lib/doroos/content/davazdahom-10"),
+    12: () => import("@/lib/doroos/content/davazdahom-12"),
   },
 };
 

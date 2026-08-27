@@ -108,11 +108,12 @@ export default function LessonPicker({ grade }: { grade: Grade }) {
                       {faNum(lesson.number)}
                     </span>
                     <span
-                      className={`shrink-0 sm:text-base text-sm ${
-                        lesson.ready
-                          ? "font-bold text-foreground"
-                          : "text-muted-foreground"
-                      }`}
+                      className={`shrink-0 sm:text-base text-sm
+                         ${
+                           lesson.ready
+                             ? "font-bold text-foreground"
+                             : "text-muted-foreground"
+                         }`}
                     >
                       {lesson.title ?? `درس ${faNum(lesson.number)}`}
                     </span>
