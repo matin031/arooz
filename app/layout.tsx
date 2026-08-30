@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Vazirmatn } from "next/font/google";
+import { Noto_Naskh_Arabic, Vazirmatn } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/UI/Header";
 import { GeometricPattern } from "@/components/persian-patterns";
@@ -8,6 +8,7 @@ import { ToastContainer } from "react-toastify";
 import Footer from "@/components/UI/Footer";
 import { Suspense } from "react";
 import { NavigationProgress } from "@/components/UI/NavigationProgress";
+import LogoReveal from "@/components/UI/LogoReveal";
 
 const vazirmatn = Vazirmatn({
   subsets: ["arabic", "latin"],
@@ -15,11 +16,18 @@ const vazirmatn = Vazirmatn({
   display: "swap",
 });
 
+const naskh = Noto_Naskh_Arabic({
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-naskh",
+  display: "swap",
+});
+
 const siteUrl = "https://aruzino.ir";
 const siteTitle =
-  "عروضینو | آموزش وزن و عروض شعر فارسی به صورت آنلاین و رایگان";
+  "سروا | آموزش وزن و عروض شعر فارسی به صورت آنلاین و رایگان";
 const siteDescription =
-  "عروضینو پلتفرم آموزشی تعاملی برای یادگیری وزن، عروض و تقطیع شعر فارسی است. با آموزش گام‌به‌گام، آزمون‌های تعاملی و راهنمای صوتی، اوزان عروضی شعر پارسی را به سادگی یاد بگیرید.";
+  "سروا پلتفرم آموزشی تعاملی برای یادگیری وزن، عروض و تقطیع شعر فارسی است. با آموزش گام‌به‌گام، آزمون‌های تعاملی و راهنمای صوتی، اوزان عروضی شعر پارسی را به سادگی یاد بگیرید.";
 
 export const metadata: Metadata = {
   icons: {
@@ -30,7 +38,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: siteTitle,
-    template: "%s | عروضینو",
+    template: "%s | سروا",
   },
   verification: {
     google: "44Gf_E9roc0H5qi8iWxWmEMyZXUJQRRZ0DQ6IDuhaZA",
@@ -38,7 +46,7 @@ export const metadata: Metadata = {
   description: siteDescription,
   keywords: [
     "عروض",
-    "عروضینو",
+    "سروا",
     "وزن شعر فارسی",
     "آموزش عروض",
     "تقطیع شعر",
@@ -48,9 +56,9 @@ export const metadata: Metadata = {
     "آموزش شعر آنلاین",
     "بحرهای عروضی",
   ],
-  authors: [{ name: "عروضینو", url: siteUrl }],
-  creator: "عروضینو",
-  publisher: "عروضینو",
+  authors: [{ name: "سروا", url: siteUrl }],
+  creator: "سروا",
+  publisher: "سروا",
   alternates: {
     canonical: "/",
   },
@@ -69,7 +77,7 @@ export const metadata: Metadata = {
     title: siteTitle,
     description: siteDescription,
     url: siteUrl,
-    siteName: "عروضینو",
+    siteName: "سروا",
     locale: "fa_IR",
     type: "website",
     images: [
@@ -77,7 +85,7 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "عروضینو | آموزش وزن شعر فارسی",
+        alt: "سروا | آموزش وزن شعر فارسی",
       },
     ],
   },
@@ -96,14 +104,14 @@ const jsonLd = {
       "@type": "WebSite",
       "@id": `${siteUrl}/#website`,
       url: siteUrl,
-      name: "عروضینو",
+      name: "سروا",
       description: siteDescription,
       inLanguage: "fa-IR",
     },
     {
       "@type": "EducationalOrganization",
       "@id": `${siteUrl}/#organization`,
-      name: "عروضینو",
+      name: "سروا",
       url: siteUrl,
       description: siteDescription,
       sameAs: [],
@@ -119,13 +127,15 @@ export default function RootLayout({
   return (
     <html
       lang="fa"
-      className={`${vazirmatn.variable}  h-full antialiased dark`}
+      className={`${vazirmatn.variable} ${naskh.variable} h-full antialiased dark`}
+      suppressHydrationWarning
     >
       <body className="text-right  flex flex-col min-h-screen">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <LogoReveal />
         <Suspense>
           <NavigationProgress />
         </Suspense>

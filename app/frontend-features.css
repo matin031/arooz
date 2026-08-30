@@ -1,0 +1,982 @@
+/* Frontend-only styles selectively transferred from Sarva. */
+
+/* ---------- Logo reveal intro (shown once per session on entry) ---------- */
+.logo-reveal {
+  position: fixed;
+  inset: 0;
+  background: var(--color-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  --lr-sweep: rgba(0, 0, 0, 0.08);
+  animation: lrLoaderOut 0.45s ease-in forwards;
+  animation-delay: 2.55s;
+}
+
+.dark .logo-reveal {
+  --lr-sweep: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes lrLoaderOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.lr-mark {
+  position: relative;
+  width: min(190px, 45vw);
+  animation: lrFly 0.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  animation-delay: 2.35s;
+}
+
+@keyframes lrFly {
+  to {
+    transform: translate(var(--fly-x, 0px), var(--fly-y, 0px))
+      scale(var(--fly-scale, 0.3));
+    opacity: 0.85;
+  }
+}
+
+.lr-clip {
+  width: 100%;
+  clip-path: inset(100% 0 0 0);
+  opacity: 0;
+  animation:
+    lrRevealClip 1.05s cubic-bezier(0.45, 0, 0.2, 1) forwards,
+    lrFadeIn 0.35s ease-out forwards;
+  animation-delay: 0.65s, 0.65s;
+}
+
+@keyframes lrRevealClip {
+  to {
+    clip-path: inset(0% 0 0 0);
+  }
+}
+
+@keyframes lrFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.lr-pen {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  animation: lrPenFade 0.25s ease-out forwards;
+  animation-delay: 0.7s;
+}
+
+@keyframes lrPenFade {
+  to {
+    opacity: 0;
+  }
+}
+
+.lr-pen svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: auto;
+}
+
+.lr-pen-line {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: lrDraw 0.5s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes lrDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.lr-sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -40%;
+  width: 35%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    var(--lr-sweep),
+    transparent
+  );
+  opacity: 0;
+  animation: lrSweepMove 0.55s ease-in-out forwards;
+  animation-delay: 2s;
+  pointer-events: none;
+}
+
+@keyframes lrSweepMove {
+  0% {
+    left: -40%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: 105%;
+    opacity: 0;
+  }
+}
+
+.lr-word {
+  text-align: center;
+  margin-top: 22px;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--color-foreground);
+  opacity: 0;
+  transform: translateY(6px);
+  animation: lrWordIn 0.5s ease-out forwards;
+  animation-delay: 1.7s;
+}
+
+@keyframes lrWordIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-reveal *,
+  .logo-reveal {
+    animation-delay: 0s !important;
+  }
+
+  .logo-reveal {
+    animation: lrLoaderOut 0.3s ease-out forwards;
+    animation-delay: 0.5s !important;
+  }
+
+  .lr-clip {
+    animation: none;
+    clip-path: none;
+    opacity: 1;
+  }
+
+  .lr-mark,
+  .lr-pen,
+  .lr-sweep {
+    animation: none;
+  }
+
+  .lr-pen {
+    opacity: 0;
+  }
+
+  .lr-word {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+/* ------------------------------------------------------------------------ */
+
+/* ============================================================
+   /aruz — عروض سماعی intro page effects
+   ============================================================ */
+
+/* Slowly drifting aurora blobs behind the hero.
+   These carry an 80–90px blur. Animating `scale` alongside the translate forces
+   the compositor to re-rasterize that blur on every single frame — the single
+   most expensive thing on the page. Translate and opacity alone can be handled
+   entirely on the compositor from one cached blurred texture, so the drift is
+   free; the opacity swell replaces the breathing that scale used to give. */
+@keyframes aruzDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  33% {
+    transform: translate3d(8%, -6%, 0);
+    opacity: 0.78;
+  }
+  66% {
+    transform: translate3d(-6%, 7%, 0);
+    opacity: 1;
+  }
+}
+@keyframes aruzDrift2 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate3d(-10%, 8%, 0);
+    opacity: 1;
+  }
+}
+
+/* Perspective "3D floor" grid that keeps scrolling toward the viewer.
+   `background-position` is not a compositable property, so animating it
+   repainted the whole floor every frame. Instead the grid lives on an
+   oversized ::before that translates by exactly one tile, which loops
+   seamlessly and never leaves the compositor. */
+@keyframes aruzGridMove {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(60px, 60px, 0);
+  }
+}
+
+/* infinite marquee of عروضی feet */
+@keyframes aruzMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* gentle float for layered depth elements */
+@keyframes aruzFloatY {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+/* slow spin for the orbiting ring */
+@keyframes aruzSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* animated conic shimmer for the CTA halo */
+@keyframes aruzConic {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.aruz-grid-floor {
+  overflow: hidden;
+}
+.aruz-grid-floor::before {
+  content: "";
+  position: absolute;
+  /* one tile of slack on every side so the loop has somewhere to travel */
+  inset: -60px;
+  --aruz-grid-line: color-mix(in oklch, var(--primary) 22%, transparent);
+  background-image:
+    linear-gradient(to right, var(--aruz-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--aruz-grid-line) 1px, transparent 1px);
+  background-size: 60px 60px;
+  will-change: transform;
+  animation: aruzGridMove 6s linear infinite;
+}
+
+.aruz-gradient-text {
+  background: linear-gradient(
+    120deg,
+    var(--color-primary),
+    var(--color-gold),
+    var(--color-primary)
+  );
+  background-size: 220% 220%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: aruzHueShift 6s ease-in-out infinite;
+  /* `background-position` is not a compositable property, so this shimmer
+     repaints the text on every frame it runs — forever, since it loops. That
+     repaint is tiny in itself; the damage was where it landed. Painting into
+     the page's root layer, it marked the whole 1280x3810 document dirty, and a
+     trace of five idle seconds showed 236 full-document repaints plus the hero
+     column re-rastered alongside it.
+     Promoting the span gives the shimmer its own layer, so the repaint is
+     confined to the width of the words and nothing above it is touched.
+     `inline-block` is what makes it promotable; `contain: paint` is
+     deliberately not used, because it would clip Persian descenders. */
+  display: inline-block;
+  will-change: transform;
+}
+@keyframes aruzHueShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* the 3D scene mounts only once the main thread is idle, so it fades in rather
+   than popping over the already-laid-out placeholders */
+@keyframes sceneFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.scene-fade-in {
+  animation: sceneFadeIn 700ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-fade-in {
+    animation: none;
+  }
+}
+
+/* the rukn label that is currently closest to the reader gets a gold accent —
+   the class is swapped only when the frontmost label actually changes, not
+   every frame */
+.arkan-near {
+  border-color: color-mix(in oklch, var(--color-gold) 65%, transparent);
+  box-shadow:
+    0 2px 14px -4px color-mix(in oklch, var(--color-gold) 55%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--color-gold) 25%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aruz-grid-floor::before,
+  .aruz-gradient-text {
+    animation: none;
+  }
+}
+
+/* ============================================================
+   /guide — galaxy map: space cable animations
+   ============================================================ */
+@keyframes cablePulse {
+  from {
+    stroke-dashoffset: 796;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes cableNode {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.9);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="cablePulse"],
+  [style*="cableNode"] {
+    animation: none !important;
+  }
+}
+
+/* The cable draws itself as the page scrolls.
+   Where the browser supports scroll-driven animations this runs entirely off
+   the main thread: no scroll listener, no JS per frame, and — crucially — no
+   style writes from JS that would force the next layout read to reflow.
+   The dash length itself is measured once in JS and written inline, because
+   the wire uses non-scaling-stroke and so must be dashed in screen pixels. */
+@keyframes cableDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .cable-draw {
+    animation: cableDraw linear both;
+    animation-timeline: scroll(root block);
+    /* finish a little before the very bottom so the wire is fully drawn by the
+       time the closing section is in view */
+    animation-range: 0% 85%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cable-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------------------------------------------------------------- سروا mark */
+
+/* Paint anything through the logo's own silhouette. Used by the loader and by
+   the intro sweep: without it a highlight moving across the mark paints the
+   square box it lives in, and the box is what you end up noticing. */
+.sarva-mask,
+.lr-sweep-wrap {
+  -webkit-mask-image: url("/favicon.svg");
+  mask-image: url("/favicon.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.lr-sweep-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* halo behind the loader's mark */
+.sarva-glow {
+  position: absolute;
+  inset: -35%;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklch, var(--primary) 45%, transparent),
+    transparent
+  );
+}
+
+/* the light that runs up the loader's silhouette */
+.sarva-shine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(
+    to top,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  animation: sarvaShine 2.4s cubic-bezier(0.45, 0, 0.35, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes sarvaShine {
+  0% {
+    top: 100%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    top: -45%;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sarva-shine {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Scroll areas inside the site's own panels and modals. The platform scrollbar
+   is a grey slab that reads as a browser part rather than a part of the page,
+   so the ones we own get the site's border/primary colours and a slimmer
+   track. Firefox takes the two-value `scrollbar-color`; WebKit needs the
+   pseudo-elements. */
+.sarva-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--primary) 55%, transparent)
+    transparent;
+}
+
+.sarva-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.sarva-scroll::-webkit-scrollbar-track {
+  background: color-mix(in oklch, var(--border) 45%, transparent);
+  border-radius: 999px;
+}
+
+.sarva-scroll::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--primary) 55%, transparent);
+  border-radius: 999px;
+}
+
+.sarva-scroll::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklch, var(--primary) 80%, transparent);
+}
+
+/* ------------------------------------------------------- decorative glows */
+
+/* `blur-3xl` is `filter: blur(64px)`. A 64px gaussian over a 288px box is one
+   of the most expensive things a page can ask a compositor for, and these
+   glows are pure decoration that never animates — the browser re-rasterises
+   them whenever the layer they sit on is repainted, which on these pages is
+   every frame the canvas behind them moves.
+   A radial gradient paints the same soft falloff in one pass with no filter
+   step, so the look survives and the per-frame cost does not. Drive it with
+   `--glow` (any colour) and, optionally, `--glow-stop` for the falloff. */
+.glow-soft {
+  background-image: radial-gradient(
+    closest-side,
+    var(--glow),
+    color-mix(in oklch, var(--glow) 35%, transparent) 45%,
+    transparent var(--glow-stop, 78%)
+  );
+  filter: none;
+}
+
+/* ------------------------------------------------ underlined Persian words */
+
+/* The descenders of ج، ی، ک، گ، ر، ز and the کسره hang well below the baseline,
+   so a default underline runs straight through them. The offset below is the
+   whole fix — but it has to be measured from the right reference.
+
+   Two earlier attempts drew the rule from the *bottom of the box* instead
+   (a background gradient pinned to `100%`, padded open with `padding-bottom`).
+   That reads as font-independent and isn't: the box bottom comes from the
+   font's declared descent metric, and Persian glyphs routinely overflow it.
+   With Vazirmatn loaded the clearance measured 6.25–9px, but with any fallback
+   (Tahoma, Arial, the generic sans) it collapsed to 1.5px and the rule went
+   back to touching the letters — which is what users saw whenever the webfont
+   failed to load.
+
+   The baseline is the stable reference, because descender depth is defined
+   from it and scales with font-size. Measured across Vazirmatn/Tahoma/Arial/
+   sans/serif at 20px, `0.58em` clears the deepest ink (including the کسره) by
+   4.25–7.5px in every one. `skip-ink: none` keeps the rule continuous rather
+   than letting the browser notch it around descenders, and staying `display:
+   inline` means a highlight long enough to wrap gets a rule on every line —
+   which the inline-block version could not do. */
+.fa-underline {
+  text-decoration: underline;
+  text-decoration-color: var(--primary);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.58em;
+  text-decoration-skip-ink: none;
+}
+
+
+/* ============================================================
+   نینجای کلمات
+   ============================================================ */
+/* همه‌چیزِ اینجا فقط تصویری است — منطق بازی در SliceField.tsx دست نخورده.
+   هر انیمیشن روی transform یا opacity کار می‌کند تا روی گوشی هم روی لایهٔ
+   کامپوزیت بماند و ۶۰ فریم را نگه دارد. */
+
+.ninja-field {
+  /* بدون این، فرزندانِ position:absolute نسبت به صفحه جا می‌گیرند */
+  isolation: isolate;
+}
+
+/* --- هاله‌های پس‌زمینه: دو لکهٔ رنگی که آرام جابه‌جا می‌شوند --- */
+@keyframes ninjaAuroraA {
+  0%,
+  100% {
+    transform: translate3d(-6%, -4%, 0) scale(1.05);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate3d(8%, 6%, 0) scale(1.25);
+    opacity: 0.8;
+  }
+}
+
+@keyframes ninjaAuroraB {
+  0%,
+  100% {
+    transform: translate3d(7%, 5%, 0) scale(1.2);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(-5%, -7%, 0) scale(1);
+    opacity: 0.7;
+  }
+}
+
+.ninja-aurora {
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.ninja-aurora-a {
+  background: radial-gradient(
+    40% 32% at 25% 30%,
+    color-mix(in oklch, var(--color-primary) 42%, transparent),
+    transparent 70%
+  );
+  animation: ninjaAuroraA 15s ease-in-out infinite;
+}
+
+.ninja-aurora-b {
+  background: radial-gradient(
+    38% 30% at 75% 62%,
+    /* رنگِ ثابت و نه توکنِ تم: زمین بازی همیشه شبانه است، و --lapis-light در
+       حالت تیره آن‌قدر تیره می‌شود که این هاله اصلاً دیده نشود. */
+    rgba(96, 140, 230, 0.42),
+    transparent 70%
+  );
+  animation: ninjaAuroraB 19s ease-in-out infinite;
+}
+
+/* بافتِ ریزِ نقطه‌ای، تا پس‌زمینه یکدستِ بی‌جان نباشد */
+.ninja-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* --- خودِ کلمه --- */
+/* یک لبهٔ روشن بالا و یک سایهٔ زیر: همان چیزی که یک تکه را از یک لکهٔ رنگی
+   جدا می‌کند. */
+.ninja-chip {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.25),
+    0 6px 16px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* --- دو نیمه بعد از برش --- */
+@keyframes ninjaHalfTop {
+  to {
+    transform: translate(-6px, -30px) rotate(-16deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ninjaHalfBottom {
+  to {
+    transform: translate(6px, 34px) rotate(14deg);
+    opacity: 0;
+  }
+}
+
+.ninja-half-top,
+.ninja-half-bottom {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  will-change: transform, opacity;
+}
+
+.ninja-half-top {
+  animation: ninjaHalfTop 0.65s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+.ninja-half-bottom {
+  animation: ninjaHalfBottom 0.65s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+/* --- جرقه‌ها --- */
+@keyframes ninjaSpark {
+  to {
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.2);
+    opacity: 0;
+  }
+}
+
+.ninja-spark {
+  will-change: transform, opacity;
+  animation: ninjaSpark 0.6s ease-out forwards;
+}
+
+/* --- «+۱» --- */
+@keyframes ninjaPopup {
+  0% {
+    opacity: 0;
+    scale: 0.6;
+  }
+  25% {
+    opacity: 1;
+    scale: 1.15;
+  }
+  100% {
+    opacity: 0;
+    scale: 1;
+    translate: 0 -42px;
+  }
+}
+
+.ninja-popup {
+  will-change: opacity, scale, translate;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  animation: ninjaPopup 0.72s ease-out forwards;
+}
+
+/* --- کمبو --- */
+@keyframes ninjaCombo {
+  0% {
+    scale: 0.6;
+    opacity: 0;
+  }
+  40% {
+    scale: 1.18;
+    opacity: 1;
+  }
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+.ninja-combo {
+  animation: ninjaCombo 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+/* --- برشِ اشتباه: یک تپشِ قرمز روی کل زمین --- */
+@keyframes ninjaWrongFlash {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.ninja-wrong-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(255, 60, 60, 0.75));
+  animation: ninjaWrongFlash 0.45s ease-out forwards;
+}
+
+/* --- نوار زمان وقتی رو به پایان است --- */
+@keyframes ninjaUrgent {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.ninja-urgent {
+  animation: ninjaUrgent 0.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ninja-aurora,
+  .ninja-urgent,
+  .ninja-combo,
+  .ninja-popup,
+  .ninja-spark,
+  .ninja-half-top,
+  .ninja-half-bottom {
+    animation: none;
+  }
+  /* بدون انیمیشن، ترکش‌ها باید بی‌صدا ناپدید شوند نه اینکه سر جایشان بمانند */
+  .ninja-spark,
+  .ninja-half-top,
+  .ninja-half-bottom,
+  .ninja-popup {
+    opacity: 0;
+  }
+}
+
+/* کارت‌های صفحهٔ حفظ کردن — برجسته، تا از متنِ توضیح جدا باشند */
+.ninja-study-card {
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklch, var(--color-primary) 22%, transparent),
+    color-mix(in oklch, var(--color-primary) 8%, transparent)
+  );
+  border: 1px solid color-mix(in oklch, var(--color-primary) 35%, transparent);
+  color: var(--color-primary);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 14px rgba(0, 0, 0, 0.25);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.ninja-study-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 8px 22px color-mix(in oklch, var(--color-primary) 30%, transparent);
+}
+
+/* دکمهٔ شروع: یک تپشِ آرام تا معلوم باشد کجا باید زد */
+@keyframes ninjaCta {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-primary) 55%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+.ninja-cta {
+  animation: ninjaCta 2.2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ninja-cta {
+    animation: none;
+  }
+}
+
+/* HUD نینجا */
+@keyframes ninjaHeartLost {
+  0% {
+    scale: 1.35;
+    filter: grayscale(0);
+  }
+  60% {
+    scale: 0.85;
+  }
+  100% {
+    scale: 1;
+    filter: grayscale(1);
+    opacity: 0.25;
+  }
+}
+
+.ninja-heart {
+  display: inline-block;
+  transition: opacity 0.2s;
+}
+
+.ninja-heart-lost {
+  animation: ninjaHeartLost 0.5s ease-out forwards;
+}
+
+@keyframes ninjaScore {
+  0% {
+    scale: 1;
+  }
+  40% {
+    scale: 1.45;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+.ninja-score {
+  display: inline-block;
+  animation: ninjaScore 0.32s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ninja-heart-lost,
+  .ninja-score {
+    animation: none;
+  }
+  .ninja-heart-lost {
+    opacity: 0.25;
+  }
+}
+
+/* ============================================================
+   بازی جاسوس
+   ============================================================ */
+
+.jasoos-hall {
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  /* ⚠️ راهرو همیشه شبانه است، در هر تمی. متنِ داخلش نمی‌تواند به
+     --foreground تکیه کند: در تمِ روشن آن رنگ تیره است و عنوان‌ها روی دیوارِ
+     تاریک عملاً ناپیدا می‌شدند. */
+  color: #f1eee7;
+}
+
+.jasoos-hall .text-muted-foreground {
+  color: rgba(241, 238, 231, 0.62);
+}
+
+/* ذراتِ معلق در نورِ راهرو */
+.jasoos-dust {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23d)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* درِ فعال: نور می‌تاباند و آرام نفس می‌کشد.
+   با box-shadow و نه filter — سایه روی لایهٔ کامپوزیت می‌ماند و کلِ درخت را
+   دوباره رنگ نمی‌کند. */
+@keyframes jasoosDoorGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 22px rgba(224, 178, 60, 0.35),
+      inset 0 0 22px rgba(224, 178, 60, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(224, 178, 60, 0.6),
+      inset 0 0 30px rgba(224, 178, 60, 0.22);
+  }
+}
+
+.jasoos-door-active {
+  animation: jasoosDoorGlow 2.4s ease-in-out infinite;
+}
+
+/* شکافِ نور زیر در */
+@keyframes jasoosDoorLight {
+  0%,
+  100% {
+    opacity: 0.55;
+    filter: blur(2px);
+  }
+  50% {
+    opacity: 1;
+    filter: blur(4px);
+  }
+}
+
+.jasoos-doorlight {
+  animation: jasoosDoorLight 2.4s ease-in-out infinite;
+  box-shadow: 0 0 16px 3px rgba(224, 178, 60, 0.75);
+}
+
+/* درِ قفل: کمی فرورفته به نظر برسد */
+.jasoos-door:disabled {
+  box-shadow: inset 0 4px 18px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jasoos-door-active,
+  .jasoos-doorlight {
+    animation: none;
+  }
+}
+
+/* اتاق بازجویی */
+.jasoos-room {
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  /* متنِ داخل اتاق همیشه روی زمینهٔ تیره می‌نشیند، پس در تمِ روشن هم باید
+     روشن بماند — وگرنه بیت روی دیوارِ شب سیاهِ روی سیاه می‌شود. */
+  color: #f1eee7;
+}
+
+.jasoos-room .text-muted-foreground {
+  color: rgba(241, 238, 231, 0.62);
+}

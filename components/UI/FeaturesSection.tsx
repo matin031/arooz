@@ -32,14 +32,14 @@ function FeaturesSection() {
           variants={fadeUp}
           className="text-2xl sm:text-3xl md:text-4xl font-bold"
         >
-          چرا عروضینو؟
+          چرا سروا؟
         </motion.h2>
         <motion.p
           variants={fadeUp}
           className="text-muted-foreground text-center max-w-xl mx-auto text-base font-[550]"
         >
-          با ترکیب زیبایی‌شناسی ایرانی و فناوری مدرن، تجربه‌ای متفاوت در یادگیری
-          عروض
+          از بازی و وزن‌یابی تا درسنامه و عروض سماعی، ابزارهای آمادهٔ یادگیری
+          ادبیات فارسی را یک‌جا تجربه کن
         </motion.p>
       </motion.div>
 
@@ -58,22 +58,22 @@ function FeaturesSection() {
           variants={ACTIVE_VARIANT}
         />
         <FeaturesCard
-          title="گوش دادن به ریتم"
-          desc="با پخشِ صوتی، ریتمِ هر وزن را بشنو و حس کن"
+          title="یادگیری از طریق بازی"
+          desc="مفاهیم ادبی را با بازی و تمرین تعاملی یاد بگیر"
           icon={<FeaturesSectionIconThird />}
           bgColor="bg-gold/20"
           variants={ACTIVE_VARIANT}
         />
         <FeaturesCard
-          title="یادگیری تعاملی"
-          desc="با پاسخ به پرسش‌های چندگزینه‌ای، اوزان را عملی و ماندگار بیاموز"
+          title="وزن‌یاب محلی"
+          desc="هر بیت را در مرورگر تحلیل کن و وزن عروضی‌اش را ببین"
           icon={<FeaturesSectionIconFourth />}
           bgColor="bg-primary/10"
           variants={ACTIVE_VARIANT}
         />
         <FeaturesCard
-          title="طراحی زیبا"
-          desc="رابطی کاربری، الهام‌گرفته از هنر و معماریِ اصیلِ ایرانی"
+          title="درسنامهٔ فارسی"
+          desc="معنی و سه قلمرو هر بیت را در محتوای منتشرشده بخوان"
           icon={<FeaturesSectionIconSecond />}
           bgColor="bg-turquoise-light/20"
           variants={ACTIVE_VARIANT}

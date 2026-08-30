@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./frontend-features.css";
 
 @variant dark (&:where(.dark, .dark *));
 :root {
@@ -9,7 +10,7 @@
   --card-foreground: oklch(0.2 0.02 250);
   --popover: oklch(0.99 0.005 85);
   --popover-foreground: oklch(0.2 0.02 250);
-  --primary: oklch(0.55 0.12 195); /* Persian turquoise */
+  --primary: #008687; /* Persian turquoise */
   --primary-foreground: oklch(0.99 0.005 85);
   --secondary: oklch(0.92 0.02 85); /* Paper brown tone */
   --secondary-foreground: oklch(0.25 0.02 250);
@@ -36,6 +37,7 @@
   --lapis-light: oklch(0.45 0.08 260);
   --gold: oklch(0.75 0.12 85);
   --gold-light: oklch(0.88 0.08 85);
+  --gold-ink: oklch(0.52 0.11 85);
   --cream: oklch(0.97 0.01 85);
   --paper: oklch(0.92 0.02 85);
 }
@@ -44,7 +46,7 @@
   /* Persian night aesthetics - Deep blues with gold and turquoise accents */
   --background: oklch(0.14 0.03 260); /* Deep night blue */
   --foreground: #f1eee7; /* Warm cream text */
-  --card: oklch(0.18 0.025 260);
+  --card: #0b121d;
   --card-foreground: oklch(0.95 0.01 85);
   --popover: oklch(0.18 0.025 260);
   --popover-foreground: oklch(0.95 0.01 85);
@@ -69,11 +71,12 @@
 
   /* Custom Persian colors - dark mode */
   --turquoise: oklch(0.65 0.12 195);
-  --turquoise-light: oklch(0.5 0.1 195);
+  --turquoise-light: oklch(0.78 0.09 195);
   --lapis: oklch(0.45 0.08 260);
-  --lapis-light: oklch(0.35 0.06 260);
+  --lapis-light: oklch(0.72 0.1 260);
   --gold: oklch(0.75 0.12 85);
   --gold-light: oklch(0.65 0.1 85);
+  --gold-ink: oklch(0.8 0.12 85);
   --cream: oklch(0.95 0.01 85);
   --paper: oklch(0.22 0.025 260);
 }
@@ -93,9 +96,21 @@
   display: none !important;
 }
 
+.bg-menu-mobile {
+  background: rgba(253, 252, 248, 0.34);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.dark .bg-menu-mobile {
+  background: rgba(11, 18, 29, 0.56);
+}
+
 @theme inline {
   --font-sans: "Vazirmatn", "Geist", sans-serif;
-  --font-serif: "Noto Naskh Arabic", "Geist", serif;
+  --font-serif: var(--font-naskh), "Noto Naskh Arabic", "Vazirmatn", serif;
   --font-mono: "Geist Mono", monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -126,6 +141,7 @@
   --color-lapis: var(--lapis);
   --color-lapis-light: var(--lapis-light);
   --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
   --color-gold-light: var(--gold-light);
   --color-cream: var(--cream);
   --color-paper: var(--paper);

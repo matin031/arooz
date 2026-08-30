@@ -1,14 +1,22 @@
 "use client";
 import { PanelAudioPlayer } from "@/components/UI/PanelAudioPlayer";
+import Modal from "@/components/UI/Modal";
+import { hasAudioFor } from "@/lib/audioManifest";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
-function VaznYabSection({
-  submitPoemSearch,
-}: {
-  submitPoemSearch: (searchTerm: string) => Promise<string | undefined>;
-}) {
+async function findMeterInBrowser(mesra1: string, mesra2?: string) {
+  const { findMeterLocally } = await import("@/lib/aruz");
+  return findMeterLocally(mesra1, mesra2)?.rhythm;
+}
+
+const afterPaint = () =>
+  new Promise<void>((done) =>
+    requestAnimationFrame(() => setTimeout(done, 0)),
+  );
+
+function VaznYabSection() {
   const rhythmToAudioUrl = (rhythm: string) => {
     const clean = rhythm.trim().replace(/\s+/g, "-");
     return `/audio/${clean}.mp3`;
@@ -57,9 +65,8 @@ function VaznYabSection({
   });
   const onsubmit = async (data: SerachPoem) => {
     setLoadingFetch(true);
-    const fullBeyt = data.poem2 ? `${data.poem1} ${data.poem2}` : data.poem1;
-
-    const result = await submitPoemSearch(fullBeyt);
+    await afterPaint();
+    const result = await findMeterInBrowser(data.poem1, data.poem2);
     if (!result) setShowModal(true);
     setAruzFeet(getPureRhythm(result ?? ""));
     setAruzBahr(getRhythmDescription(result ?? ""));
@@ -218,12 +225,16 @@ function VaznYabSection({
               className=" w-full bg-primary/10 text-center
              text-primary font-bold rounded-3xl"
             >
-              {aruzFeet ? (
+              {aruzFeet && hasAudioFor(aruzFeet) ? (
                 <PanelAudioPlayer
                   audioSrc={rhythmToAudioUrl(aruzFeet)}
                   color="main"
                   isPanel={false}
                 />
+              ) : aruzFeet ? (
+                <div className="py-6 text-sm text-muted-foreground">
+                  فایلِ صوتی برای این وزن هنوز آماده نشده
+                </div>
               ) : (
                 <div className=" py-6">- - - -</div>
               )}
@@ -246,13 +257,9 @@ function VaznYabSection({
         </div> */}
       </div>
       {showModal && (
-        <div
-          className=" flex items-center justify-center fixed backdrop-blur-xs
-         top-0 right-0 w-screen h-screen z-50"
-        >
+        <Modal onClose={() => setShowModal(false)} className="max-w-md p-4">
           <div
-            className=" bg-card p-4 text-center rounded-2xl flex flex-col
-         items-center justify-center relative z-30  gap-y-4 max-w-[90%] sm:w-auto"
+            className="relative flex flex-col items-center justify-center gap-y-4 text-center"
           >
             <div className=" size-25">
               <svg
@@ -351,7 +358,7 @@ function VaznYabSection({
               </svg>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </>
   );

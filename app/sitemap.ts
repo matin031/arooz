@@ -22,5 +22,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    ...[
+      "/aruz",
+      "/vazn-yab",
+      "/game",
+      "/game/jasoos",
+      "/game/ninja",
+      "/game/pairs",
+      "/doroos",
+      "/doroos/yazdahom",
+      "/doroos/yazdahom/1",
+      "/quiz",
+    ].map((path) => ({
+      url: `${baseUrl}${path}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: path === "/game" || path === "/vazn-yab" ? 0.9 : 0.8,
+    })),
   ];
 }

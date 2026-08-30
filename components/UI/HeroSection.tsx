@@ -20,14 +20,14 @@ function HeroSection() {
         variants={springPop}
         className=" max-w-48 mx-auto mb-3 sm:mb-0 rounded-full text-xs sm:text-sm px-4 font-semibold py-1 bg-primary/10 text-primary"
       >
-        پلتفرمِ آموزشِ عروضِ پارسی
+        پلتفرمِ آموزشی ســروا
       </motion.div>
       <h1 className=" -space-y-6 sm:-space-y-8 md:-space-y-12 font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-foreground leading-tight mb-6 ">
         <motion.span variants={fadeUp} className=" block ">
-          آهنگِ شعر پارسی را
+          مسیری نو
         </motion.span>
         <motion.span variants={fadeUp} className="text-primary block">
-          با عروضینو بیاموز
+          برای یادگیری ادبیات پارسی
         </motion.span>
       </h1>
       <motion.p
@@ -35,8 +35,8 @@ function HeroSection() {
         className=" text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl
            mx-auto mb-8 text-pretty "
       >
-        با روشی تعاملی و امروزی، اوزانِ عروضی را گام‌به‌گام بشناس و ریتمِ زیبای
-        شعرِ حافظ، سعدی و دیگر بزرگان را حس کن
+        از آهنگ و وزن شعر تا دستور زبان، آرایه‌های ادبی و مفاهیم؛ همراه با
+        درسنامهٔ فارسی و بازی‌های تعاملی، به روشی امروزی و ماندگار
       </motion.p>
       <motion.div
         variants={fadeUp}
@@ -45,7 +45,7 @@ function HeroSection() {
         <Link
           className="active:scale-95 hover:brightness-90 transition-all bg-primary
            px-4 py-1 text-white justify-center rounded-xl flex items-center gap-x-2 z-20 relative"
-          href={"/quiz"}
+          href={"/game"}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +59,7 @@ function HeroSection() {
               clipRule="evenodd"
             />
           </svg>
-          شروع آزمون
+          شروع بازی
         </Link>
         <Link
           className=" border z-20 relative  hover:bg-accent/70 transition-all active:scale-95 rounded-xl px-6 py-1"
