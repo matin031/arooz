@@ -2,6 +2,7 @@
 
 import { requireAdmin } from "@/lib/require-admin";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
+import { recordAudit } from "@/lib/admin/audit";
 
 /** Scoped to the three types the admin panel authors today. The DB/UI
  *  (Quiz.tsx, QuestionCard.tsx, QuestionOption.tsx) also support
@@ -170,7 +171,7 @@ export async function quizAdminGet(questionId: string): Promise<QuizQuestionDeta
  *  adminUpsertQuestion: options are authored as one unit with the question,
  *  not edited individually. */
 export async function quizAdminUpsertQuestion(input: QuizQuestionInput): Promise<ActionResult<{ id: string }>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
   const errors = validateQuizQuestion(input);
   if (errors.length > 0) return { ok: false, errors };
@@ -222,13 +223,28 @@ export async function quizAdminUpsertQuestion(input: QuizQuestionInput): Promise
   );
   if (optionsError) return { ok: false, errors: [optionsError.message] };
 
+  await recordAudit({
+    actor: admin,
+    action: "quiz.question_save",
+    targetType: "quiz_question",
+    targetId: questionId,
+    summary: input.id ? "سؤال عروض سماعی ویرایش شد" : "سؤال عروض سماعی افزوده شد",
+    metadata: { type: input.type, difficulty: input.difficulty ?? "medium" },
+  });
   return { ok: true, data: { id: questionId } };
 }
 
 export async function quizAdminDeleteQuestion(questionId: string): Promise<ActionResult<null>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const supabase = createSupabaseAdmin();
   const { error } = await supabase.from("questions").delete().eq("id", questionId);
   if (error) return { ok: false, errors: [error.message] };
+  await recordAudit({
+    actor: admin,
+    action: "quiz.question_delete",
+    targetType: "quiz_question",
+    targetId: questionId,
+    summary: "سؤال عروض سماعی حذف شد",
+  });
   return { ok: true, data: null };
 }

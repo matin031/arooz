@@ -36,6 +36,8 @@
   --lapis-light: oklch(0.45 0.08 260);
   --gold: oklch(0.75 0.12 85);
   --gold-light: oklch(0.88 0.08 85);
+  /* High-contrast gold reserved for text on light surfaces. */
+  --gold-ink: oklch(0.52 0.11 85);
   --cream: oklch(0.97 0.01 85);
   --paper: oklch(0.92 0.02 85);
 }
@@ -69,11 +71,12 @@
 
   /* Custom Persian colors - dark mode */
   --turquoise: oklch(0.65 0.12 195);
-  --turquoise-light: oklch(0.5 0.1 195);
+  --turquoise-light: oklch(0.78 0.09 195);
   --lapis: oklch(0.45 0.08 260);
-  --lapis-light: oklch(0.35 0.06 260);
+  --lapis-light: oklch(0.72 0.1 260);
   --gold: oklch(0.75 0.12 85);
   --gold-light: oklch(0.65 0.1 85);
+  --gold-ink: oklch(0.8 0.12 85);
   --cream: oklch(0.95 0.01 85);
   --paper: oklch(0.22 0.025 260);
 }
@@ -142,6 +145,7 @@
   --color-lapis: var(--lapis);
   --color-lapis-light: var(--lapis-light);
   --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
   --color-gold-light: var(--gold-light);
   --color-cream: var(--cream);
   --color-paper: var(--paper);

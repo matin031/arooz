@@ -155,7 +155,7 @@ export default function PassageCard({ passage }: { passage: Passage }) {
                     passage.meaning ? "sm:col-span-2" : "sm:col-span-5"
                   }`}
                 >
-                  <h3 className="mb-1.5 text-xs font-black tracking-wide text-gold">
+                  <h3 className="mb-1.5 text-xs font-black tracking-wide text-gold-ink">
                     مفهوم
                   </h3>
                   <p className="text-sm leading-relaxed font-bold text-foreground">
@@ -192,7 +192,7 @@ export default function PassageCard({ passage }: { passage: Passage }) {
 
       {passage.affinity?.length ? (
         <section className="relative z-20 mt-4 rounded-2xl border border-gold/30 bg-card p-5">
-          <h3 className="mb-3 text-sm font-black text-gold">قرابت معنایی</h3>
+          <h3 className="mb-3 text-sm font-black text-gold-ink">قرابت معنایی</h3>
           <ul className="space-y-2.5">
             {passage.affinity.map((a, i) => (
               <li

@@ -2,6 +2,7 @@
 
 import { requireAdmin } from "@/lib/require-admin";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
+import { recordAudit } from "@/lib/admin/audit";
 import {
   correctAnswerSchemaByType,
   questionPartContentSchema,
@@ -240,7 +241,7 @@ export async function adminCreateExam(input: {
   examKey: string;
   totalScore: number;
 }): Promise<ActionResult<{ id: string }>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const supabase = createSupabaseAdmin();
 
   const { data, error } = await supabase
@@ -255,6 +256,14 @@ export async function adminCreateExam(input: {
     .select("id")
     .single();
   if (error) return { ok: false, errors: [error.message] };
+  await recordAudit({
+    actor: admin,
+    action: "exam.create",
+    targetType: "exam",
+    targetId: data.id,
+    summary: `آزمون «${input.title}» ساخته شد`,
+    metadata: { examKey: input.examKey, grade: input.grade, totalScore: input.totalScore },
+  });
   return { ok: true, data: { id: data.id } };
 }
 
@@ -262,7 +271,7 @@ export async function adminCreateSection(
   examId: string,
   input: { title: string; orderIndex: number; sectionScore: number },
 ): Promise<ActionResult<{ id: string }>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const supabase = createSupabaseAdmin();
 
   const { data, error } = await supabase
@@ -276,6 +285,14 @@ export async function adminCreateSection(
     .select("id")
     .single();
   if (error) return { ok: false, errors: [error.message] };
+  await recordAudit({
+    actor: admin,
+    action: "exam.section_create",
+    targetType: "exam_section",
+    targetId: data.id,
+    summary: `بخش «${input.title}» به آزمون افزوده شد`,
+    metadata: { examId },
+  });
   return { ok: true, data: { id: data.id } };
 }
 
@@ -287,7 +304,7 @@ export async function adminUpsertQuestion(
   sectionId: string,
   input: AdminQuestionInput,
 ): Promise<ActionResult<{ id: string }>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
   const errors = validateQuestionInput(input);
   if (errors.length > 0) return { ok: false, errors };
@@ -366,29 +383,122 @@ export async function adminUpsertQuestion(
     }
   }
 
+  await recordAudit({
+    actor: admin,
+    action: "exam.question_save",
+    targetType: "exam_question",
+    targetId: questionId,
+    summary: input.id ? `سؤال ${input.number} ویرایش شد` : `سؤال ${input.number} افزوده شد`,
+    metadata: { sectionId, partCount: input.parts.length },
+  });
   return { ok: true, data: { id: questionId } };
 }
 
-export async function adminDeleteQuestion(questionId: string): Promise<ActionResult<null>> {
+export async function adminUpdateExam(
+  examId: string,
+  input: { title: string; examKey: string; grade: number; totalScore: number },
+): Promise<ActionResult<null>> {
+  const admin = await requireAdmin();
+  const title = input.title?.trim() ?? "";
+  const examKey = input.examKey?.trim() ?? "";
+  const errors: string[] = [];
+  if (title.length < 3) errors.push("عنوان آزمون خیلی کوتاه است.");
+  if (title.length > 200) errors.push("عنوان آزمون خیلی بلند است.");
+  if (!/^[a-z0-9-]{3,60}$/i.test(examKey)) {
+    errors.push("شناسهٔ آزمون فقط می‌تواند شامل حروف انگلیسی، عدد و خط تیره باشد.");
+  }
+  if (!Number.isInteger(input.grade) || input.grade < 1 || input.grade > 12) {
+    errors.push("پایه باید عددی بین ۱ تا ۱۲ باشد.");
+  }
+  if (!Number.isFinite(input.totalScore) || input.totalScore <= 0 || input.totalScore > 100) {
+    errors.push("نمرهٔ کل باید عددی بین ۱ تا ۱۰۰ باشد.");
+  }
+  if (errors.length) return { ok: false, errors };
+
+  const supabase = createSupabaseAdmin();
+  const { data: before } = await supabase.from("exams").select("title, exam_session").eq("id", examId).maybeSingle();
+  if (!before) return { ok: false, errors: ["آزمون پیدا نشد."] };
+  const { error } = await supabase.from("exams").update({
+    title,
+    exam_session: examKey,
+    grade: input.grade,
+    total_score: input.totalScore,
+  }).eq("id", examId);
+  if (error) {
+    return {
+      ok: false,
+      errors: [error.code === "23505" ? "آزمون دیگری با این شناسه وجود دارد." : error.message],
+    };
+  }
+  await recordAudit({
+    actor: admin,
+    action: "exam.update",
+    targetType: "exam",
+    targetId: examId,
+    summary: before.title === title
+      ? `مشخصات آزمون «${title}» ویرایش شد`
+      : `عنوان آزمون از «${before.title}» به «${title}» تغییر کرد`,
+    metadata: {
+      examKeyBefore: before.exam_session,
+      examKeyAfter: examKey,
+      grade: input.grade,
+      totalScore: input.totalScore,
+    },
+  });
+  return { ok: true, data: null };
+}
+
+export async function adminExamAttemptCount(examId: string): Promise<number> {
   await requireAdmin();
+  const { count } = await createSupabaseAdmin()
+    .from("exam_attempts")
+    .select("id", { count: "exact", head: true })
+    .eq("exam_id", examId);
+  return count ?? 0;
+}
+
+export async function adminDeleteQuestion(questionId: string): Promise<ActionResult<null>> {
+  const admin = await requireAdmin();
   const supabase = createSupabaseAdmin();
   const { error } = await supabase.from("exam_questions").delete().eq("id", questionId);
   if (error) return { ok: false, errors: [error.message] };
+  await recordAudit({
+    actor: admin,
+    action: "exam.question_delete",
+    targetType: "exam_question",
+    targetId: questionId,
+    summary: "سؤال آزمون حذف شد",
+  });
   return { ok: true, data: null };
 }
 
 export async function adminDeleteSection(sectionId: string): Promise<ActionResult<null>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const supabase = createSupabaseAdmin();
   const { error } = await supabase.from("exam_sections").delete().eq("id", sectionId);
   if (error) return { ok: false, errors: [error.message] };
+  await recordAudit({
+    actor: admin,
+    action: "exam.section_delete",
+    targetType: "exam_section",
+    targetId: sectionId,
+    summary: "بخش آزمون و سؤال‌های آن حذف شد",
+  });
   return { ok: true, data: null };
 }
 
 export async function adminDeleteExam(examId: string): Promise<ActionResult<null>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const supabase = createSupabaseAdmin();
+  const { data: exam } = await supabase.from("exams").select("title").eq("id", examId).maybeSingle();
   const { error } = await supabase.from("exams").delete().eq("id", examId);
   if (error) return { ok: false, errors: [error.message] };
+  await recordAudit({
+    actor: admin,
+    action: "exam.delete",
+    targetType: "exam",
+    targetId: examId,
+    summary: `آزمون «${exam?.title ?? examId}» حذف شد`,
+  });
   return { ok: true, data: null };
 }

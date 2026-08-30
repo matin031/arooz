@@ -2,6 +2,7 @@
 
 import { requireAdmin } from "@/lib/require-admin";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
+import { recordAudit } from "@/lib/admin/audit";
 
 export type AdminVocabWord = {
   id: string;
@@ -54,7 +55,7 @@ type ActionResult = { ok: true } | { ok: false; error: string };
 
 /** Create a new word or update an existing one. */
 export async function vocabAdminUpsert(input: VocabWordInput): Promise<ActionResult> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   if (!isGrade(input.grade)) return { ok: false, error: "پایهٔ نامعتبر است." };
   if (!Number.isInteger(input.lesson) || input.lesson < 1 || input.lesson > 18) {
     return { ok: false, error: "شمارهٔ درس باید بین ۱ تا ۱۸ باشد." };
@@ -73,6 +74,14 @@ export async function vocabAdminUpsert(input: VocabWordInput): Promise<ActionRes
       .update({ grade: input.grade, lesson: input.lesson, word, meaning, image })
       .eq("id", input.id);
     if (error) return { ok: false, error: error.message };
+    await recordAudit({
+      actor: admin,
+      action: "vocab.word_save",
+      targetType: "vocab_word",
+      targetId: input.id,
+      summary: `واژهٔ «${word}» ویرایش شد`,
+      metadata: { grade: input.grade, lesson: input.lesson },
+    });
     return { ok: true };
   }
 
@@ -87,17 +96,35 @@ export async function vocabAdminUpsert(input: VocabWordInput): Promise<ActionRes
     .maybeSingle();
   const nextSort = (last?.sort_index ?? 0) + 1;
 
-  const { error } = await supabase
+  const { data: created, error } = await supabase
     .from("vocab_words")
-    .insert({ grade: input.grade, lesson: input.lesson, word, meaning, image, sort_index: nextSort });
+    .insert({ grade: input.grade, lesson: input.lesson, word, meaning, image, sort_index: nextSort })
+    .select("id")
+    .single();
   if (error) return { ok: false, error: error.message };
+  await recordAudit({
+    actor: admin,
+    action: "vocab.word_save",
+    targetType: "vocab_word",
+    targetId: created.id,
+    summary: `واژهٔ «${word}» افزوده شد`,
+    metadata: { grade: input.grade, lesson: input.lesson },
+  });
   return { ok: true };
 }
 
 export async function vocabAdminDelete(id: string): Promise<ActionResult> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const supabase = createSupabaseAdmin();
+  const { data: word } = await supabase.from("vocab_words").select("word").eq("id", id).maybeSingle();
   const { error } = await supabase.from("vocab_words").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
+  await recordAudit({
+    actor: admin,
+    action: "vocab.word_delete",
+    targetType: "vocab_word",
+    targetId: id,
+    summary: `واژهٔ «${word?.word ?? id}» حذف شد`,
+  });
   return { ok: true };
 }

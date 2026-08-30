@@ -2,6 +2,7 @@
 
 import { requireAdmin } from "@/lib/require-admin";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
+import { recordAudit } from "@/lib/admin/audit";
 
 export type ActionResult<T> = { ok: true; data: T } | { ok: false; errors: string[] };
 
@@ -13,7 +14,7 @@ const QUIZ_AUDIO_BUCKET = "quiz-audio";
  *  one function; nothing in the quiz schema or the forms cares where the
  *  URL points, they just store/play whatever string comes back. */
 export async function adminUploadQuizAudio(formData: FormData): Promise<ActionResult<{ url: string }>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
@@ -47,5 +48,13 @@ export async function adminUploadQuizAudio(formData: FormData): Promise<ActionRe
   }
 
   const { data } = supabase.storage.from(QUIZ_AUDIO_BUCKET).getPublicUrl(path);
+  await recordAudit({
+    actor: admin,
+    action: "upload.audio",
+    targetType: "file",
+    targetId: path,
+    summary: `فایل صوتی «${file.name}» آپلود شد`,
+    metadata: { bucket: QUIZ_AUDIO_BUCKET, size: file.size, contentType: file.type },
+  });
   return { ok: true, data: { url: data.publicUrl } };
 }

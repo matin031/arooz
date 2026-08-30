@@ -2,6 +2,8 @@
 
 import { requireAdmin } from "@/lib/require-admin";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
+import { recordAudit } from "@/lib/admin/audit";
+import { USER_PAGE_SIZE } from "@/lib/admin/log-constants";
 
 export type AdminUserRow = {
   id: string;
@@ -15,73 +17,150 @@ export type AdminUserRow = {
 };
 
 export type ActionResult<T> = { ok: true; data: T } | { ok: false; errors: string[] };
+export type UserListParams = {
+  query?: string;
+  role?: "student" | "admin";
+  status?: "active" | "banned" | "unverified";
+  limit?: number;
+  offset?: number;
+};
 
-/** auth.users isn't exposed over PostgREST, so listing users goes through
- *  the GoTrue admin API (supabase.auth.admin.*) instead of a table query —
- *  only available with the service-role key. Merged with each user's role
- *  from profiles (users created before the 0002 migration's trigger existed
- *  won't have a profiles row yet, hence the "student" fallback). */
-export async function adminListUsers(): Promise<AdminUserRow[]> {
-  await requireAdmin();
+const ROLE_LABEL = { student: "دانش‌آموز", admin: "مدیر" } as const;
+
+async function allUsers(): Promise<AdminUserRow[]> {
   const supabase = createSupabaseAdmin();
-
-  const { data: usersPage, error: usersError } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+  const [{ data: usersPage, error: usersError }, { data: profiles, error: profilesError }] = await Promise.all([
+    supabase.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+    supabase.from("profiles").select("id, role, full_name"),
+  ]);
   if (usersError) throw new Error(`adminListUsers: ${usersError.message}`);
-
-  const { data: profiles, error: profilesError } = await supabase.from("profiles").select("id, role, full_name");
   if (profilesError) throw new Error(`adminListUsers profiles: ${profilesError.message}`);
 
-  const roleById = new Map((profiles ?? []).map((p) => [p.id, p.role as "student" | "admin"]));
-  const nameById = new Map((profiles ?? []).map((p) => [p.id, p.full_name ?? undefined]));
+  const roleById = new Map((profiles ?? []).map((profile) => [profile.id, profile.role as "student" | "admin"]));
+  const nameById = new Map((profiles ?? []).map((profile) => [profile.id, profile.full_name ?? undefined]));
 
-  return usersPage.users
-    .map((u) => ({
-      id: u.id,
-      email: u.email,
-      fullName: nameById.get(u.id) ?? (u.user_metadata?.full_name as string | undefined),
-      role: roleById.get(u.id) ?? "student",
-      createdAt: u.created_at,
-      lastSignInAt: u.last_sign_in_at ?? undefined,
-      emailConfirmed: !!u.email_confirmed_at,
-      isBanned: !!u.banned_until && new Date(u.banned_until) > new Date(),
-    }))
-    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  return usersPage.users.map((user) => ({
+    id: user.id,
+    email: user.email,
+    fullName: nameById.get(user.id) ?? (user.user_metadata?.full_name as string | undefined),
+    role: roleById.get(user.id) ?? "student",
+    createdAt: user.created_at,
+    lastSignInAt: user.last_sign_in_at ?? undefined,
+    emailConfirmed: Boolean(user.email_confirmed_at),
+    isBanned: Boolean(user.banned_until && new Date(user.banned_until) > new Date()),
+  })).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-/** Creates the profiles row if the user pre-dates the signup trigger
- *  (same situation the very first admin promotion hit manually). */
-export async function adminSetUserRole(userId: string, role: "student" | "admin"): Promise<ActionResult<null>> {
+export async function adminListUsers(
+  params: UserListParams = {},
+): Promise<{ users: AdminUserRow[]; total: number }> {
+  await requireAdmin();
+  const search = params.query?.trim().toLocaleLowerCase("fa");
+  let users = await allUsers();
+  if (search) {
+    users = users.filter((user) =>
+      user.email?.toLocaleLowerCase("fa").includes(search) ||
+      user.fullName?.toLocaleLowerCase("fa").includes(search),
+    );
+  }
+  if (params.role) users = users.filter((user) => user.role === params.role);
+  if (params.status === "banned") users = users.filter((user) => user.isBanned);
+  if (params.status === "unverified") users = users.filter((user) => !user.emailConfirmed);
+  if (params.status === "active") users = users.filter((user) => !user.isBanned && user.emailConfirmed);
+
+  const total = users.length;
+  const offset = Math.max(params.offset ?? 0, 0);
+  const limit = Math.min(Math.max(params.limit ?? USER_PAGE_SIZE, 1), 200);
+  return { users: users.slice(offset, offset + limit), total };
+}
+
+export async function adminGetUser(userId: string): Promise<AdminUserRow | null> {
   await requireAdmin();
   const supabase = createSupabaseAdmin();
+  const [{ data, error }, profileResult] = await Promise.all([
+    supabase.auth.admin.getUserById(userId),
+    supabase.from("profiles").select("role, full_name").eq("id", userId).maybeSingle(),
+  ]);
+  if (error || !data.user) return null;
+  const user = data.user;
+  return {
+    id: user.id,
+    email: user.email,
+    fullName: profileResult.data?.full_name ?? (user.user_metadata?.full_name as string | undefined),
+    role: (profileResult.data?.role as "student" | "admin" | undefined) ?? "student",
+    createdAt: user.created_at,
+    lastSignInAt: user.last_sign_in_at ?? undefined,
+    emailConfirmed: Boolean(user.email_confirmed_at),
+    isBanned: Boolean(user.banned_until && new Date(user.banned_until) > new Date()),
+  };
+}
 
+export async function adminUserCounts(): Promise<{
+  total: number;
+  admins: number;
+  banned: number;
+  unverified: number;
+}> {
+  await requireAdmin();
+  const users = await allUsers();
+  return {
+    total: users.length,
+    admins: users.filter((user) => user.role === "admin").length,
+    banned: users.filter((user) => user.isBanned).length,
+    unverified: users.filter((user) => !user.emailConfirmed).length,
+  };
+}
+
+export async function adminSetUserRole(userId: string, role: "student" | "admin"): Promise<ActionResult<null>> {
+  const admin = await requireAdmin();
+  if (userId === admin.id && role !== "admin") {
+    return { ok: false, errors: ["نمی‌توانید نقش مدیریت خودتان را بردارید."] };
+  }
+  const supabase = createSupabaseAdmin();
+  const current = await adminGetUser(userId);
   const { error } = await supabase.from("profiles").upsert({ id: userId, role }, { onConflict: "id" });
   if (error) return { ok: false, errors: [error.message] };
+  await recordAudit({
+    actor: admin,
+    action: "user.role_change",
+    targetType: "user",
+    targetId: userId,
+    summary: `نقش «${current?.email ?? userId}» از ${ROLE_LABEL[current?.role ?? "student"]} به ${ROLE_LABEL[role]} تغییر کرد`,
+    metadata: { previousRole: current?.role, nextRole: role },
+  });
   return { ok: true, data: null };
 }
 
-/** GoTrue has no permanent-ban flag, only a duration — "876000h" (~100
- *  years) is the standard way every Supabase project represents "banned
- *  indefinitely"; "none" lifts it. A banned user's existing sessions stay
- *  valid until they expire, but they can't sign in again. */
 export async function adminSetUserBanned(userId: string, banned: boolean): Promise<ActionResult<null>> {
   const admin = await requireAdmin();
-  if (userId === admin.id) return { ok: false, errors: ["نمی‌توانید حساب خودتان را بن کنید."] };
-
-  const supabase = createSupabaseAdmin();
-  const { error } = await supabase.auth.admin.updateUserById(userId, {
+  if (userId === admin.id) return { ok: false, errors: ["نمی‌توانید حساب خودتان را مسدود کنید."] };
+  const user = await adminGetUser(userId);
+  const { error } = await createSupabaseAdmin().auth.admin.updateUserById(userId, {
     ban_duration: banned ? "876000h" : "none",
   });
   if (error) return { ok: false, errors: [error.message] };
+  await recordAudit({
+    actor: admin,
+    action: banned ? "user.ban" : "user.unban",
+    targetType: "user",
+    targetId: userId,
+    summary: banned ? `کاربر «${user?.email ?? userId}» مسدود شد` : `مسدودی «${user?.email ?? userId}» برداشته شد`,
+  });
   return { ok: true, data: null };
 }
 
-/** Permanently deletes the auth user; profiles row cascades with it. */
 export async function adminDeleteUser(userId: string): Promise<ActionResult<null>> {
   const admin = await requireAdmin();
   if (userId === admin.id) return { ok: false, errors: ["نمی‌توانید حساب خودتان را حذف کنید."] };
-
-  const supabase = createSupabaseAdmin();
-  const { error } = await supabase.auth.admin.deleteUser(userId);
+  const user = await adminGetUser(userId);
+  const { error } = await createSupabaseAdmin().auth.admin.deleteUser(userId);
   if (error) return { ok: false, errors: [error.message] };
+  await recordAudit({
+    actor: admin,
+    action: "user.delete",
+    targetType: "user",
+    targetId: userId,
+    summary: `کاربر «${user?.email ?? userId}» حذف شد`,
+  });
   return { ok: true, data: null };
 }

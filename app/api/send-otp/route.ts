@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase-server";
+import { getAppSetting } from "@/lib/admin/settings-store";
 
 export async function POST(req: Request) {
   const { email } = await req.json();
@@ -39,8 +40,9 @@ export async function POST(req: Request) {
   }
 
   // ارسال ایمیل
+  const from = (await getAppSetting("mail.from")) ?? "noreply@aruzino.ir";
   const { error: emailError } = await resend.emails.send({
-    from: "noreply@aruzino.ir",
+    from,
     to: email,
     subject: "کد تأیید سروا",
     html: `

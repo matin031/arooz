@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
+import { recordAudit } from "@/lib/admin/audit";
 import {
   poemExcerpt,
   type ActionResult,
@@ -283,6 +284,14 @@ export async function clubAdminSetPostStatus(
   const { error } = await supabase.from("club_posts").update(patch).eq("id", id);
   if (error) return { ok: false, error: error.message };
 
+  await recordAudit({
+    actor: admin,
+    action: "club.post_status",
+    targetType: "club_post",
+    targetId: id,
+    summary: `وضعیت سروده به «${status}» تغییر کرد`,
+    metadata: { status, hasReviewNote: Boolean(note?.trim()) },
+  });
   revalidateClub(id);
   return { ok: true, data: null };
 }
@@ -291,7 +300,7 @@ export async function clubAdminSetPostFeatured(
   id: string,
   featured: boolean,
 ): Promise<ActionResult<null>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const supabase = createSupabaseAdmin();
   const { error } = await supabase
     .from("club_posts")
@@ -299,15 +308,29 @@ export async function clubAdminSetPostFeatured(
     .eq("id", id)
     .eq("status", "approved");
   if (error) return { ok: false, error: error.message };
+  await recordAudit({
+    actor: admin,
+    action: "club.post_feature",
+    targetType: "club_post",
+    targetId: id,
+    summary: featured ? "سروده برگزیده شد" : "سروده از حالت برگزیده خارج شد",
+  });
   revalidateClub(id);
   return { ok: true, data: null };
 }
 
 export async function clubAdminDeletePost(id: string): Promise<ActionResult<null>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const supabase = createSupabaseAdmin();
   const { error } = await supabase.from("club_posts").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
+  await recordAudit({
+    actor: admin,
+    action: "club.post_delete",
+    targetType: "club_post",
+    targetId: id,
+    summary: "سروده و دیدگاه‌های آن حذف شد",
+  });
   revalidateClub(id);
   return { ok: true, data: null };
 }
@@ -331,12 +354,20 @@ export async function clubAdminSetCommentStatus(
     .select("post_id")
     .maybeSingle();
   if (error) return { ok: false, error: error.message };
+  await recordAudit({
+    actor: admin,
+    action: "club.comment_status",
+    targetType: "club_comment",
+    targetId: id,
+    summary: `وضعیت دیدگاه به «${status}» تغییر کرد`,
+    metadata: { status, hasReviewNote: Boolean(note?.trim()) },
+  });
   revalidateClub((data?.post_id as string) ?? undefined);
   return { ok: true, data: null };
 }
 
 export async function clubAdminDeleteComment(id: string): Promise<ActionResult<null>> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const supabase = createSupabaseAdmin();
   const { data, error } = await supabase
     .from("club_comments")
@@ -345,6 +376,13 @@ export async function clubAdminDeleteComment(id: string): Promise<ActionResult<n
     .select("post_id")
     .maybeSingle();
   if (error) return { ok: false, error: error.message };
+  await recordAudit({
+    actor: admin,
+    action: "club.comment_delete",
+    targetType: "club_comment",
+    targetId: id,
+    summary: "دیدگاه حذف شد",
+  });
   revalidateClub((data?.post_id as string) ?? undefined);
   return { ok: true, data: null };
 }
@@ -420,6 +458,14 @@ export async function clubAdminResolveReport(
     .update({ status, resolved_at: new Date().toISOString(), resolved_by: admin.id })
     .eq("id", id);
   if (error) return { ok: false, error: error.message };
+  await recordAudit({
+    actor: admin,
+    action: "club.report_resolve",
+    targetType: "club_report",
+    targetId: id,
+    summary: `گزارش با وضعیت «${status}» بسته شد`,
+    metadata: { status },
+  });
   revalidatePath("/admin/club");
   return { ok: true, data: null };
 }
