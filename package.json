@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --require ./scripts/test-runtime.cjs --import tsx --test \"tests/**/*.test.ts\" \"lib/**/__tests__/*.test.ts\"",
+    "test:aruz-rapid": "node --require ./scripts/test-runtime.cjs --import tsx --test \"tests/aruz-rapid/*.test.ts\"",
+    "test:grammar-circuit": "node --require ./scripts/test-runtime.cjs --import tsx --test \"lib/grammar-circuit/__tests__/*.test.ts\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -41,6 +44,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
+    "tsx": "^4.23.11",
     "typescript": "^5"
   },
   "overrides": {

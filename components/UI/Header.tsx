@@ -9,7 +9,7 @@ import type { User } from "@supabase/supabase-js";
 
 import { useRouter } from "next/navigation";
 
-function Header() {
+function Header({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -190,25 +190,36 @@ function Header() {
   ];
 
   return (
-    <nav className="mt-4 flex justify-between items-center flex-row-reverse container">
+    <nav
+      className={`flex justify-between items-center flex-row-reverse container ${
+        compact ? "mt-1.5" : "mt-4"
+      }`}
+    >
       <motion.div
         initial={{ opacity: 0, x: 40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className=" sm:px-3 sm:py-1 rounded-2xl"
+        className={compact ? "rounded-2xl" : " sm:px-3 sm:py-1 rounded-2xl"}
       >
         <Link
           className="hover:brightness-90 gap-x-2 items-center size-full flex"
           href={"/"}
         >
-          <h3 className=" hidden sm:block text-3xl font-bold text-primary">
+          <h3
+            className={`hidden sm:block font-bold text-primary ${
+              compact ? "text-xl" : "text-3xl"
+            }`}
+          >
             ســـروا
           </h3>
           <div
             className="bg-linear-to-br transition-all flex
            items-center justify-center "
           >
-            <div id="site-logo" className=" size-13 text-primary-foreground">
+            <div
+              id="site-logo"
+              className={`text-primary-foreground ${compact ? "size-9" : "size-13"}`}
+            >
               <MainLogo />
             </div>
           </div>
@@ -219,7 +230,7 @@ function Header() {
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className=" font-semibold flex items-center gap-x-4"
+        className={`font-semibold flex items-center ${compact ? "gap-x-2" : "gap-x-4"}`}
       >
         <DarkModeButton />
         {user ? (
@@ -272,8 +283,12 @@ function Header() {
             </Link>
           </>
         )}
-        |
-        <div className=" text-muted-foreground items-center  gap-x-5 flex text-lg flex-row">
+        {!compact && "|"}
+        <div
+          className={`text-muted-foreground items-center gap-x-5 text-lg flex-row ${
+            compact ? "hidden" : "flex"
+          }`}
+        >
           <div className=" block z-200 relative">
             <button
               className="text-muted-foreground text-sm xs:text-base flex items-center gap-x-2 flex-row-reverse"

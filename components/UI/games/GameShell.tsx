@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { useChromeMode } from "@/lib/immersive-mode";
 
 /** Wraps a single game page.
  *
@@ -20,14 +21,18 @@ import { AnimatePresence, motion } from "motion/react";
 export default function GameShell({
   title,
   progressKeys = [],
+  dense = false,
   children,
 }: {
   title: string;
   /** localStorage keys holding this game's in-progress round */
   progressKeys?: string[];
+  /** روی صفحه‌های کوتاه، نوارِ بالا را جمع می‌کند بی‌آنکه راهِ خروج حذف شود. */
+  dense?: boolean;
   children: ReactNode;
 }) {
   const [confirmExit, setConfirmExit] = useState(false);
+  const immersive = useChromeMode() !== "off";
 
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -51,7 +56,12 @@ export default function GameShell({
 
   return (
     <div dir="rtl" className="relative z-20">
-      <div className="container mx-auto max-w-4xl pt-6">
+      {!immersive && (
+      <div
+        className={`container mx-auto max-w-4xl pt-6 ${
+          dense ? "[@media(max-height:560px)]:pt-2" : ""
+        }`}
+      >
         <button
           onClick={() => setConfirmExit(true)}
           className="inline-flex items-center gap-x-1 text-sm text-muted-foreground transition-all hover:text-primary"
@@ -70,9 +80,12 @@ export default function GameShell({
               d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
             />
           </svg>
-          بازگشت به کهکشانِ بازی‌ها
+          <span className={dense ? "[@media(max-height:560px)]:hidden" : undefined}>
+            بازگشت به کهکشانِ بازی‌ها
+          </span>
         </button>
       </div>
+      )}
 
       {children}
 

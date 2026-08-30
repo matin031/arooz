@@ -25,6 +25,7 @@ const FOOT: Record<string, string> = {
   متفاعلاتن: "UU-U--",
   فع: "-",
   لن: "-",
+  "فع‌لن": "--",
 };
 
 function buildPattern(ark: string): string {
@@ -479,3 +480,6 @@ export function bestScan(
   }
   return closest;
 }
+
+/** جدولِ رکن → الگوی هجایی، برای مصرفِ موتورِ بازیِ پل وزن. */
+export const ARKAN: Readonly<Record<string, string>> = FOOT;
