@@ -1325,3 +1325,1151 @@ button {
 .jasoos-room .text-muted-foreground {
   color: rgba(241, 238, 231, 0.62);
 }
+
+/* ============================================================
+   بازی تقطیعِ سریع  (components/UI/aruz-rapid)
+   ============================================================
+
+   دو تمِ واقعی، نه یکی با چند رنگِ وارونه.
+
+   نسخهٔ قبلی — مثل راهروِ جاسوس — همیشه شبانه بود. برای تمِ تیره خوب کار
+   می‌کرد ولی در تمِ روشن، بازی مثل یک پنجرهٔ سیاهِ چسبانده‌شده وسطِ صفحهٔ
+   کرمِ سروا دیده می‌شد. حالا همهٔ رنگ‌ها از توکن می‌آیند و هر تم مجموعهٔ
+   کاملِ خودش را دارد؛ هیچ کامپوننتی رنگِ ثابت ندارد.
+
+   قواعدِ چیدمان دست‌نخورده‌اند. سه قاعده، بی‌همپوشانی:
+
+     A) پیش‌فرض ......... رایانه و لپ‌تاپ
+     B) max-width 767 و min-height 561 ... موبایلِ ایستاده
+     C) max-height 560 .................. صفحهٔ کوتاه (گوشیِ خوابیده) */
+
+@property --aruzr-reveal {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* ── تمِ روشن ──────────────────────────────────────────────
+   عاجِ گرم برای سطحِ بازی، سطحِ داخلیِ کمی سردتر با ته‌مایهٔ فیروزه‌ای،
+   تایپوگرافیِ سرمه‌ایِ عمیق، و همان فیروزهٔ سروا به‌عنوان لهجه. */
+.aruzr-root {
+  --aruzr-surface: #fcfaf4;
+  --aruzr-surface-2: #ffffff;
+  --aruzr-inset: #f1f5f4;
+  --aruzr-veil: rgba(255, 255, 255, 0.72);
+
+  --aruzr-text: #16273c;
+  --aruzr-text-2: #4d5a66;
+  --aruzr-text-3: #626d76;
+
+  --aruzr-border: #dfe6e3;
+  --aruzr-border-strong: #c7d5d3;
+
+  --aruzr-accent: #00807f;
+  --aruzr-accent-ink: #036f6e;
+  --aruzr-accent-soft: rgba(0, 128, 127, 0.13);
+  --aruzr-accent-line: rgba(0, 128, 127, 0.32);
+  --aruzr-accent-glow: rgba(0, 128, 127, 0.22);
+
+  --aruzr-gold: #b7822a;
+  --aruzr-gold-soft: rgba(183, 130, 42, 0.2);
+  --aruzr-gold-line: rgba(183, 130, 42, 0.34);
+
+  --aruzr-success: #0c8071;
+  --aruzr-failure: #c0554b;
+  --aruzr-failure-soft: rgba(192, 85, 75, 0.16);
+  --aruzr-failure-line: rgba(192, 85, 75, 0.62);
+
+  --aruzr-timer-track: rgba(22, 39, 60, 0.1);
+  --aruzr-dot-idle: rgba(22, 39, 60, 0.24);
+
+  --aruzr-btn: linear-gradient(180deg, #ffffff, #f7f4ec);
+  --aruzr-btn-hover: linear-gradient(180deg, #ffffff, #edf6f4);
+  --aruzr-btn-active: linear-gradient(180deg, #f4f1ea, #eae6dc);
+  --aruzr-btn-inner: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  /* سایهٔ روشن: پهن و بسیار نرم، نه یک لکهٔ تیره زیرِ کارت. */
+  --aruzr-shadow: 0 26px 70px -40px rgba(22, 39, 60, 0.34), 0 2px 8px -4px rgba(22, 39, 60, 0.08);
+  --aruzr-shadow-soft: 0 10px 30px -22px rgba(22, 39, 60, 0.3);
+
+  --aruzr-texture: rgba(22, 39, 60, 0.05);
+  --aruzr-ambient-a: rgba(0, 128, 127, 0.07);
+  --aruzr-ambient-b: rgba(183, 130, 42, 0.06);
+  --aruzr-scrim: rgba(252, 250, 244, 0.82);
+
+  position: relative;
+  z-index: 20;
+  min-width: 0;
+}
+
+/* ── تمِ تیره ────────────────────────────────────────────── */
+.dark .aruzr-root {
+  --aruzr-surface: #0a1220;
+  --aruzr-surface-2: rgba(255, 255, 255, 0.055);
+  --aruzr-inset: rgba(255, 255, 255, 0.035);
+  --aruzr-veil: rgba(255, 255, 255, 0.06);
+
+  --aruzr-text: #f3f0e9;
+  --aruzr-text-2: rgba(243, 240, 233, 0.6);
+  --aruzr-text-3: rgba(243, 240, 233, 0.52);
+
+  --aruzr-border: rgba(255, 255, 255, 0.09);
+  --aruzr-border-strong: rgba(255, 255, 255, 0.16);
+
+  --aruzr-accent: #2ed3c6;
+  --aruzr-accent-ink: #04231f;
+  --aruzr-accent-soft: rgba(46, 211, 198, 0.12);
+  --aruzr-accent-line: rgba(46, 211, 198, 0.35);
+  --aruzr-accent-glow: rgba(46, 211, 198, 0.55);
+
+  --aruzr-gold: #e8b95c;
+  --aruzr-gold-soft: rgba(232, 185, 92, 0.14);
+  --aruzr-gold-line: rgba(232, 185, 92, 0.4);
+
+  --aruzr-success: #2ed3c6;
+  --aruzr-failure: #f0736a;
+  --aruzr-failure-soft: rgba(240, 115, 106, 0.14);
+  --aruzr-failure-line: rgba(240, 115, 106, 0.5);
+
+  --aruzr-timer-track: rgba(255, 255, 255, 0.09);
+  --aruzr-dot-idle: rgba(255, 255, 255, 0.14);
+
+  --aruzr-btn: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  --aruzr-btn-hover: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035));
+  --aruzr-btn-active: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  --aruzr-btn-inner: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+
+  --aruzr-shadow: 0 40px 90px -50px rgba(0, 0, 0, 1);
+  --aruzr-shadow-soft: 0 12px 30px -22px rgba(0, 0, 0, 1);
+
+  --aruzr-texture: rgba(255, 255, 255, 0.055);
+  --aruzr-ambient-a: rgba(46, 211, 198, 0.16);
+  --aruzr-ambient-b: rgba(232, 185, 92, 0.12);
+  --aruzr-scrim: rgba(5, 9, 15, 0.72);
+}
+
+/* بازیِ فعال روی صفحهٔ کوچک: یک صفحهٔ بازیِ واقعی، نه یک صفحهٔ وب.
+   100dvh و نه 100vh، چون نوارِ آدرسِ موبایل ارتفاعِ واقعی را کم و زیاد
+   می‌کند و با vh، دکمه‌ها زیرِ نوار گیر می‌کردند. */
+.aruzr-root-immersive {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* بدونِ این دو، فرزندها به‌جای کوچک‌شدن از کادر بیرون می‌زنند و
+     overflow:hidden فقط پنهانشان می‌کند. */
+  min-height: 0;
+  min-width: 0;
+  z-index: 60;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* در بازیِ تمام‌صفحه، سربرگ و پاورقیِ سایت را خودِ SiteChrome رندر نمی‌کند
+   (lib/immersive-mode). این کلاس فقط اسکرولِ صفحه را قفل می‌کند. */
+html.aruzr-immersive,
+html.aruzr-immersive body {
+  overflow: hidden;
+}
+
+.aruzr-root-immersive .aruzr-stage,
+.aruzr-root-immersive .aruzr-board {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* --- سطحِ بازی --- */
+
+.aruzr-surface {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 80% at 78% -10%, var(--aruzr-ambient-a), transparent 62%),
+    radial-gradient(100% 70% at 8% 110%, var(--aruzr-ambient-b), transparent 64%),
+    var(--aruzr-surface);
+  color: var(--aruzr-text);
+}
+
+/* بافتِ خیلی ریز، تا سطح یکدست و پلاستیکی به نظر نرسد. */
+.aruzr-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: radial-gradient(var(--aruzr-texture) 0.5px, transparent 1px);
+  background-size: 22px 22px;
+  z-index: -1;
+}
+
+/* --- نوارِ بالا --- */
+
+.aruzr-topbar {
+  display: grid;
+  /* ستونِ میانی همیشه دقیقاً وسطِ صفحه است، هرچقدر هم دو طرف نامساوی باشند. */
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  min-width: 0;
+}
+
+.aruzr-topbar-side {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.aruzr-topbar-side-end {
+  justify-content: flex-end;
+}
+
+.aruzr-topbar-center {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.aruzr-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--aruzr-border);
+  background: var(--aruzr-surface-2);
+  color: var(--aruzr-text-2);
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.aruzr-icon-btn:hover {
+  color: var(--aruzr-accent);
+  border-color: var(--aruzr-accent-line);
+  background: var(--aruzr-accent-soft);
+}
+
+.aruzr-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.aruzr-chip {
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 1px solid var(--aruzr-border);
+  background: var(--aruzr-surface-2);
+  color: var(--aruzr-text-2);
+  padding: 0.22rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.aruzr-chip strong {
+  color: var(--aruzr-text);
+  font-weight: 800;
+}
+
+/* --- صحنه --- */
+
+.aruzr-board {
+  position: relative;
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+  padding: 1.5rem 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+  border-radius: 1.75rem;
+  border: 1px solid var(--aruzr-border);
+  box-shadow: var(--aruzr-shadow);
+}
+
+.aruzr-preview-region,
+.aruzr-play-region {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  min-width: 0;
+}
+
+.aruzr-preview-region {
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+
+.aruzr-play-region {
+  gap: 1rem;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+
+.aruzr-focus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.7rem, 2.4vh, 1.15rem);
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.aruzr-root-immersive .aruzr-board {
+  max-width: none;
+  margin: 0;
+  /* فاصلهٔ بالا عمداً بیشتر از پایین است: ترکیب کمی پایین‌تر می‌نشیند تا
+     دکمه‌ها به شست نزدیک بمانند و حاشیهٔ زیرِ آن‌ها کوچک بماند. */
+  padding: clamp(0.25rem, 9vh, 4.5rem) 1rem 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* روی صفحهٔ بلند، کشیدنِ سه بلوک تا لبه‌ها فقط سه جزیره در خلأ می‌سازد.
+   به‌جایش کلِ چیدمان ارتفاعِ طبیعیِ خودش را می‌گیرد و وسطِ صفحه می‌نشیند. */
+.aruzr-root-immersive .aruzr-board {
+  justify-content: center;
+  gap: clamp(0.9rem, 3.2vh, 2.25rem);
+}
+
+.aruzr-root-immersive .aruzr-preview-region,
+.aruzr-root-immersive .aruzr-play-region,
+.aruzr-root-immersive .aruzr-focus {
+  flex: 0 0 auto;
+}
+
+.aruzr-root-immersive .aruzr-play-region {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.9rem);
+}
+
+/* روی رومیزی، نوارِ بالا و تختهٔ بازی یک کارتِ یکپارچه‌اند. جای نوار در
+   درختِ React عوض نمی‌شود — فقط دو لبه به هم دوخته می‌شوند. */
+.aruzr-root:not(.aruzr-root-immersive) .aruzr-topbar-slot:not(:empty) {
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+  border: 1px solid var(--aruzr-border);
+  border-bottom: 0;
+  border-radius: 1.75rem 1.75rem 0 0;
+  background: var(--aruzr-surface);
+  color: var(--aruzr-text);
+}
+
+.aruzr-root:not(.aruzr-root-immersive) .aruzr-topbar-slot:not(:empty) + .aruzr-stage .aruzr-board {
+  border-top: 0;
+  border-radius: 0 0 1.75rem 1.75rem;
+}
+
+/* هالهٔ محیطی فقط در حالتِ تمام‌صفحه معنی دارد. در حالتِ کارتی، گرادیان از
+   لبهٔ *تخته* شروع می‌شد در حالی که نوارِ بالا تخت بود — و همان اختلافِ
+   جزئی، یک درزِ افقی می‌ساخت. سطحِ یکدست، کارت را یکپارچه نگه می‌دارد. */
+.aruzr-root:not(.aruzr-root-immersive) .aruzr-board.aruzr-surface {
+  background: var(--aruzr-surface);
+}
+
+/* --- قابِ مصراع --- */
+
+.aruzr-panel {
+  position: relative;
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+  border-radius: 1.35rem;
+  padding: 1.1rem 1rem;
+  background: var(--aruzr-inset);
+  border: 1px solid var(--aruzr-border);
+  box-shadow: var(--aruzr-btn-inner);
+  transition: border-color 300ms ease, box-shadow 300ms ease, background-color 300ms ease;
+  min-width: 0;
+}
+
+/* وقتی متن پوشیده است، قاب آرام است؛ وقتی کامل باز شد، لبه‌اش می‌گیرد. */
+.aruzr-panel[data-state="open"] {
+  border-color: var(--aruzr-accent-line);
+  box-shadow: var(--aruzr-btn-inner), 0 0 44px -18px var(--aruzr-accent-glow);
+}
+
+/* لحظهٔ تکمیل: حلقهٔ نور یک بار باز می‌شود و می‌ایستد. */
+.aruzr-panel[data-complete="true"] {
+  animation: aruzrPanelComplete 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes aruzrPanelComplete {
+  0% {
+    box-shadow: var(--aruzr-btn-inner), 0 0 0 0 var(--aruzr-accent-glow);
+  }
+  60% {
+    box-shadow: var(--aruzr-btn-inner), 0 0 0 10px transparent;
+  }
+  100% {
+    box-shadow: var(--aruzr-btn-inner), 0 0 44px -18px var(--aruzr-accent-glow);
+  }
+}
+
+.aruzr-panel-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--aruzr-text-3);
+}
+
+.aruzr-panel-label::before,
+.aruzr-panel-label::after {
+  content: "";
+  height: 1px;
+  width: clamp(1rem, 12%, 3.5rem);
+  background: linear-gradient(90deg, transparent, var(--aruzr-border-strong));
+}
+
+.aruzr-panel-label::after {
+  background: linear-gradient(90deg, var(--aruzr-border-strong), transparent);
+}
+
+/* --- متنِ پیش‌نمایش و اسپویلر --- */
+
+.aruzr-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+/* اگر مصراع از عرضِ صفحه بلندتر بود، همین جعبه اسکرول می‌شود — نه خودِ
+   صفحه. هر دو لایه داخلِ همین اسکرول‌اند، پس هم‌ترازی‌شان به‌هم نمی‌خورد. */
+.aruzr-preview-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* فضای امن برای فتحه/کسره/تشدید؛ بدون این، اعراب بریده می‌شد. */
+  padding-block: 0.4em;
+  padding-inline: 0.2em;
+  scrollbar-width: none;
+}
+
+.aruzr-preview-scroll::-webkit-scrollbar {
+  height: 0;
+}
+
+.aruzr-text-stack {
+  position: relative;
+  width: max-content;
+  margin-inline: auto;
+  --aruzr-reveal: 0;
+  --aruzr-feather: 7px;
+  transition: --aruzr-reveal 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* هر دو لایه دقیقاً یک رشته‌اند با یک متریک. متن هرگز تکه‌تکه نمی‌شود؛
+   اگر می‌شد، اتصالِ حروف و جای اعراب خراب می‌شد. */
+.aruzr-text {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 4.6vw, 2.5rem);
+  /* وزنِ ۵۰۰: پررنگ‌تر از این، اعراب روی حروف شلوغ می‌شود. */
+  font-weight: 500;
+  line-height: 2.05;
+  text-align: right;
+  white-space: pre;
+  letter-spacing: normal;
+}
+
+/* لایهٔ پوشاننده: همان متن، ولی خوانده نمی‌شود. در تمِ روشن هالهٔ تیره و در
+   تمِ تیره هالهٔ روشن — در هر دو، متن شفاف است و فقط مه‌اش می‌ماند. */
+.aruzr-text-spoiler {
+  color: transparent;
+  text-shadow: 0 0 0.4em var(--aruzr-spoiler-ink, rgba(22, 39, 60, 0.42));
+  opacity: 0;
+  transition: opacity 320ms ease;
+  /* بخشی که باز شده، دیگر هالهٔ اسپویلر ندارد. */
+  -webkit-mask-image: linear-gradient(
+    to left,
+    transparent 0,
+    transparent calc(var(--aruzr-reveal) * 100%),
+    #000 calc(var(--aruzr-reveal) * 100% + var(--aruzr-feather))
+  );
+  mask-image: linear-gradient(
+    to left,
+    transparent 0,
+    transparent calc(var(--aruzr-reveal) * 100%),
+    #000 calc(var(--aruzr-reveal) * 100% + var(--aruzr-feather))
+  );
+}
+
+.dark .aruzr-text-spoiler {
+  --aruzr-spoiler-ink: rgba(243, 240, 233, 0.5);
+}
+
+.aruzr-text-spoiler[data-spoilered="true"] {
+  opacity: 1;
+}
+
+/* آشکارسازی از راست، یعنی از آغازِ خواندنِ فارسی. جهتِ گرادیان فیزیکی است
+   و به dir وابسته نیست. لبه نرم است تا وسطِ یک حرف قیچی نشود. */
+.aruzr-text-visible {
+  position: absolute;
+  inset: 0;
+  color: var(--aruzr-text);
+  -webkit-mask-image: linear-gradient(
+    to left,
+    #000 0,
+    #000 calc(var(--aruzr-reveal) * 100%),
+    transparent calc(var(--aruzr-reveal) * 100% + var(--aruzr-feather))
+  );
+  mask-image: linear-gradient(
+    to left,
+    #000 0,
+    #000 calc(var(--aruzr-reveal) * 100%),
+    transparent calc(var(--aruzr-reveal) * 100% + var(--aruzr-feather))
+  );
+}
+
+/* نوارِ نازکِ زمانِ مطالعه، زیرِ مصراع. */
+.aruzr-preview-progress {
+  height: 2px;
+  width: min(100%, 16rem);
+  margin-inline: auto;
+  border-radius: 999px;
+  background: var(--aruzr-timer-track);
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.aruzr-preview-progress[data-running="true"] {
+  opacity: 1;
+}
+
+.aruzr-preview-progress-fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: right;
+  background: var(--aruzr-accent);
+  animation-name: aruzrDrain;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  animation-play-state: paused;
+}
+
+.aruzr-preview-progress[data-running="true"] .aruzr-preview-progress-fill {
+  animation-play-state: running;
+}
+
+/* --- نقطه‌های پیشرفتِ واحدها --- */
+
+.aruzr-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  min-height: 0.5rem;
+}
+
+.aruzr-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--aruzr-dot-idle);
+  transition: background-color 260ms ease, transform 260ms ease, box-shadow 260ms ease;
+}
+
+.aruzr-dot[data-state="done"] {
+  background: var(--aruzr-accent);
+  box-shadow: 0 0 10px -2px var(--aruzr-accent-glow);
+}
+
+.aruzr-dot[data-state="current"] {
+  background: var(--aruzr-gold);
+  transform: scale(1.5);
+  box-shadow: 0 0 12px -2px var(--aruzr-gold-line);
+}
+
+/* --- واحدِ جاری --- */
+
+.aruzr-unit-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 6rem;
+  min-width: 0;
+}
+
+.aruzr-unit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: clamp(6rem, 26vw, 9rem);
+  padding: 0.5rem 1.6rem 0.7rem;
+  border-radius: 1.5rem;
+  border: 1px solid var(--aruzr-accent-line);
+  background:
+    radial-gradient(120% 140% at 50% 0%, var(--aruzr-accent-soft), transparent 70%),
+    var(--aruzr-surface-2);
+  box-shadow: var(--aruzr-btn-inner), 0 0 60px -30px var(--aruzr-accent-glow);
+  font-family: var(--font-serif);
+  font-size: clamp(2.2rem, 9vw, 3.4rem);
+  font-weight: 600;
+  line-height: 1.75;
+  color: var(--aruzr-text);
+  text-align: center;
+  transition: border-color 200ms ease, box-shadow 200ms ease, opacity 200ms ease;
+}
+
+.aruzr-unit[data-hidden="true"] {
+  opacity: 0.3;
+  border-color: var(--aruzr-border);
+  box-shadow: none;
+}
+
+/* هر واحدِ تازه با یک ظهورِ ملایم می‌آید — نه پرش، نه لرزش. */
+.aruzr-unit-in {
+  animation: aruzrUnitIn 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.aruzr-unit[data-feedback="correct"] {
+  border-color: var(--aruzr-accent);
+  box-shadow: var(--aruzr-btn-inner), 0 0 46px -14px var(--aruzr-accent-glow);
+}
+
+.aruzr-unit[data-feedback="wrong"],
+.aruzr-unit[data-feedback="timeout"] {
+  border-color: var(--aruzr-failure-line);
+  background: var(--aruzr-failure-soft);
+  box-shadow: var(--aruzr-btn-inner), 0 0 46px -18px var(--aruzr-failure-line);
+}
+
+@keyframes aruzrUnitIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+}
+
+/* --- نوارِ مهلت --- */
+
+.aruzr-timer {
+  position: relative;
+  height: 4px;
+  width: min(100%, 24rem);
+  margin-inline: auto;
+  border-radius: 999px;
+  background: var(--aruzr-timer-track);
+  overflow: hidden;
+}
+
+.aruzr-timer[data-idle="true"] .aruzr-timer-fill {
+  visibility: hidden;
+}
+
+/* پایانِ زمان: خودِ نوار یک بار کوتاه روشن می‌شود. */
+.aruzr-timer[data-flash="timeout"] {
+  animation: aruzrTimerFlash 300ms ease-out;
+}
+
+@keyframes aruzrTimerFlash {
+  0%,
+  100% {
+    background: var(--aruzr-timer-track);
+  }
+  35% {
+    background: var(--aruzr-failure-line);
+  }
+}
+
+.aruzr-timer-fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: right;
+  border-radius: 999px;
+  /* دو انیمیشنِ هم‌زمان با یک مدت: یکی طول را کم می‌کند، دیگری رنگ را در
+     ثانیهٔ آخر به طلایی و سپس هشدار می‌برد. هر دو با همان delayِ منفیِ
+     بازگشت از مکث هماهنگ می‌مانند. */
+  animation-name: aruzrDrain, aruzrTimerHue;
+  animation-timing-function: linear, linear;
+  animation-fill-mode: forwards, forwards;
+}
+
+@keyframes aruzrDrain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes aruzrTimerHue {
+  0%,
+  62% {
+    background-color: var(--aruzr-accent);
+  }
+  84% {
+    background-color: var(--aruzr-gold);
+  }
+  100% {
+    background-color: var(--aruzr-failure);
+  }
+}
+
+/* --- دکمه‌های پاسخ --- */
+
+.aruzr-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  width: min(100%, 30rem);
+  margin-inline: auto;
+}
+
+/* جای U و _ در طولِ نشست عوض نمی‌شود؛ حافظهٔ انگشت بخشی از بازی است.
+   روی دکمه فقط نماد است — هیچ زیرنویسِ توضیحی. بازی با تکرار یاد گرفته
+   می‌شود، نه با خواندنِ برچسب. */
+.aruzr-answer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 5.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid var(--aruzr-border);
+  background: var(--aruzr-btn);
+  box-shadow: var(--aruzr-btn-inner), var(--aruzr-shadow-soft);
+  color: var(--aruzr-text);
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
+}
+
+/* هالهٔ رنگیِ هر دکمه از بالا می‌تابد: فیروزه‌ای برای کوتاه، طلایی برای بلند.
+   همین تفاوتِ رنگ، حافظهٔ انگشت را سریع‌تر می‌سازد. */
+.aruzr-answer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.9;
+  transition: opacity 200ms ease;
+}
+
+.aruzr-answer[data-length="short"]::before {
+  background: radial-gradient(120% 130% at 50% -20%, var(--aruzr-accent-soft), transparent 68%);
+}
+
+.aruzr-answer[data-length="long"]::before {
+  background: radial-gradient(120% 130% at 50% -20%, var(--aruzr-gold-soft), transparent 68%);
+}
+
+.aruzr-answer:not(:disabled):hover {
+  transform: translateY(-2px);
+  background: var(--aruzr-btn-hover);
+}
+
+.aruzr-answer[data-length="short"]:not(:disabled):hover {
+  border-color: var(--aruzr-accent-line);
+  box-shadow: var(--aruzr-btn-inner), 0 0 34px -16px var(--aruzr-accent-glow);
+}
+
+.aruzr-answer[data-length="long"]:not(:disabled):hover {
+  border-color: var(--aruzr-gold-line);
+  box-shadow: var(--aruzr-btn-inner), 0 0 34px -16px var(--aruzr-gold-line);
+}
+
+.aruzr-answer:not(:disabled):active {
+  transform: scale(0.975);
+  background: var(--aruzr-btn-active);
+}
+
+.aruzr-answer:focus-visible {
+  outline: 2px solid var(--aruzr-accent);
+  outline-offset: 3px;
+}
+
+.aruzr-answer:disabled {
+  opacity: 0.55;
+}
+
+.aruzr-answer:disabled::before {
+  opacity: 0.3;
+}
+
+.aruzr-answer[data-flash="correct"] {
+  border-color: var(--aruzr-accent);
+  background: var(--aruzr-accent-soft);
+  box-shadow: var(--aruzr-btn-inner), 0 0 40px -14px var(--aruzr-accent-glow);
+}
+
+.aruzr-answer[data-flash="wrong"],
+.aruzr-answer[data-flash="timeout"] {
+  border-color: var(--aruzr-failure-line);
+  background: var(--aruzr-failure-soft);
+  box-shadow: var(--aruzr-btn-inner), 0 0 40px -14px var(--aruzr-failure-line);
+}
+
+.aruzr-answer-symbol {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* «_» روی خطِ کرسی می‌نشیند و پایینِ دکمه می‌افتد؛ کمی بالا می‌آید تا مثلِ
+   نشانهٔ هجای بلند، وسطِ دکمه دیده شود. */
+.aruzr-answer[data-length="long"] .aruzr-answer-symbol {
+  /* کشیدنِ عمودی، «_» را به خطِ ضخیمِ نشانهٔ هجای بلند نزدیک می‌کند. */
+  transform: translateY(-0.42em) scale(1.15, 1.8);
+}
+
+/* --- روپوشِ مکث --- */
+
+.aruzr-pause-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--aruzr-scrim);
+  backdrop-filter: blur(8px);
+  z-index: 5;
+  animation: aruzrFadeIn 180ms ease;
+}
+
+.aruzr-pause-card {
+  border-radius: 1.25rem;
+  border: 1px solid var(--aruzr-border);
+  background: var(--aruzr-surface);
+  padding: 1.15rem 1.75rem;
+  text-align: center;
+  color: var(--aruzr-text);
+  box-shadow: var(--aruzr-shadow);
+}
+
+@keyframes aruzrFadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+/* --- صفحه‌های آغاز و نتیجه --- */
+
+.aruzr-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  border: 1px solid var(--aruzr-border);
+  box-shadow: var(--aruzr-shadow);
+}
+
+.aruzr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--aruzr-accent-line);
+  background: var(--aruzr-accent-soft);
+  color: var(--aruzr-accent);
+  padding: 0.25rem 0.9rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.aruzr-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3.4rem;
+  padding-inline: 2.6rem;
+  border-radius: 1.1rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--aruzr-cta-ink, #ffffff);
+  background: var(--aruzr-cta-bg, linear-gradient(180deg, #0a9b95, #007270));
+  box-shadow: 0 16px 34px -20px var(--aruzr-accent-glow);
+  transition: transform 140ms ease, box-shadow 200ms ease, filter 200ms ease;
+  touch-action: manipulation;
+}
+
+.dark .aruzr-cta {
+  --aruzr-cta-ink: #04231f;
+  --aruzr-cta-bg: linear-gradient(180deg, #47e2d4, #12867e);
+}
+
+.aruzr-cta:hover {
+  filter: brightness(1.06);
+}
+
+.aruzr-cta:active {
+  transform: scale(0.975);
+}
+
+.aruzr-ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.9rem;
+  padding-inline: 1.4rem;
+  border-radius: 1rem;
+  border: 1px solid var(--aruzr-border);
+  background: var(--aruzr-surface-2);
+  color: var(--aruzr-text-2);
+  font-size: 0.9rem;
+  transition: color 180ms ease, border-color 180ms ease, transform 140ms ease;
+  touch-action: manipulation;
+}
+
+.aruzr-ghost-btn:hover {
+  color: var(--aruzr-text);
+  border-color: var(--aruzr-accent-line);
+}
+
+.aruzr-ghost-btn:active {
+  transform: scale(0.975);
+}
+
+.aruzr-stat {
+  border-radius: 1.1rem;
+  border: 1px solid var(--aruzr-border);
+  background: var(--aruzr-inset);
+  padding: 0.85rem 0.6rem;
+  text-align: center;
+}
+
+.aruzr-stat[data-primary="true"] {
+  border-color: var(--aruzr-accent-line);
+  background: var(--aruzr-accent-soft);
+}
+
+.aruzr-stat-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--aruzr-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.aruzr-stat[data-primary="true"] .aruzr-stat-value {
+  color: var(--aruzr-accent);
+}
+
+.aruzr-stat-label {
+  margin-top: 0.15rem;
+  font-size: 0.68rem;
+  color: var(--aruzr-text-2);
+}
+
+.aruzr-result-text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.3rem, 4.2vw, 2rem);
+  line-height: 2;
+  font-weight: 500;
+  color: var(--aruzr-text);
+}
+
+.aruzr-muted {
+  color: var(--aruzr-text-2);
+}
+
+.aruzr-subtle {
+  color: var(--aruzr-text-3);
+}
+
+.aruzr-warn {
+  color: var(--aruzr-gold);
+}
+
+/* --- ریزه‌کاری‌ها --- */
+
+/* متنِ فقط-برای-صفحه‌خوان.
+   sr-only در تیلویند با margin:-1px کار می‌کند؛ در RTL جای استاتیکش لبهٔ
+   راست است و همان یک پیکسل، کلِ صفحه را یک پیکسل اسکرولِ افقی می‌داد. */
+.aruzr-root .sr-only {
+  right: 0;
+  left: auto;
+  margin: 0;
+}
+
+.aruzr-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 4rem 1rem;
+  color: var(--aruzr-text-2);
+}
+
+.aruzr-spinner {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  border: 2px solid var(--aruzr-accent-soft);
+  border-top-color: var(--aruzr-accent);
+  animation: aruzrSpin 700ms linear infinite;
+}
+
+@keyframes aruzrSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.aruzr-kbd {
+  display: inline-block;
+  border-radius: 0.4rem;
+  border: 1px solid var(--aruzr-border);
+  background: var(--aruzr-surface-2);
+  padding: 0.08rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--aruzr-text-2);
+}
+
+/* ---------- B) موبایلِ ایستاده ---------- */
+@media (max-width: 767px) and (min-height: 561px) {
+  .aruzr-text {
+    font-size: clamp(1.35rem, 6.4vw, 2.1rem);
+  }
+
+  .aruzr-unit {
+    font-size: clamp(2.6rem, 15vw, 4rem);
+    min-width: clamp(7rem, 38vw, 11rem);
+    padding: clamp(0.5rem, 1.4vh, 1rem) 1.8rem clamp(0.7rem, 1.8vh, 1.2rem);
+  }
+
+  .aruzr-unit-wrap {
+    min-height: clamp(5.5rem, 17vh, 9rem);
+  }
+
+  .aruzr-answer {
+    min-height: clamp(5rem, 11vh, 7rem);
+  }
+
+  .aruzr-panel {
+    padding: clamp(0.85rem, 2.2vh, 1.5rem) 0.85rem;
+  }
+
+  .aruzr-root-immersive .aruzr-board {
+    gap: clamp(0.9rem, 3.6vh, 2.6rem);
+  }
+}
+
+/* ---------- C) صفحهٔ کوتاه (گوشیِ خوابیده) ---------- */
+@media (max-height: 560px) {
+  .aruzr-topbar {
+    padding: 0.4rem 0.85rem;
+  }
+
+  .aruzr-icon-btn {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 0.7rem;
+  }
+
+  .aruzr-text {
+    font-size: clamp(1.05rem, 4.2vh, 1.7rem);
+    line-height: 1.95;
+  }
+
+  .aruzr-panel {
+    padding: 0.5rem 0.75rem;
+    border-radius: 1rem;
+  }
+
+  .aruzr-panel-label {
+    display: none;
+  }
+
+  .aruzr-unit {
+    font-size: clamp(1.8rem, 11vh, 2.9rem);
+    line-height: 1.5;
+    padding: 0.2rem 1.2rem 0.35rem;
+    border-radius: 1.1rem;
+    min-width: clamp(5rem, 16vw, 8rem);
+  }
+
+  .aruzr-unit-wrap {
+    min-height: 3rem;
+  }
+
+  .aruzr-answer {
+    min-height: clamp(2.9rem, 16vh, 4.25rem);
+    border-radius: 1.1rem;
+  }
+
+  .aruzr-answer-symbol {
+    font-size: 1.7rem;
+  }
+
+  .aruzr-root-immersive .aruzr-board {
+    gap: 0.5rem;
+    padding-inline: 1.5rem;
+  }
+
+  .aruzr-root-immersive .aruzr-play-region {
+    gap: 0.55rem;
+  }
+
+  .aruzr-preview-scroll {
+    padding-block: 0.3em;
+  }
+
+  .aruzr-dots {
+    min-height: 0.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aruzr-text-stack,
+  .aruzr-text-spoiler,
+  .aruzr-preview-progress,
+  .aruzr-dot {
+    transition-duration: 1ms;
+  }
+
+  .aruzr-unit-in,
+  .aruzr-pause-overlay,
+  .aruzr-panel[data-complete="true"],
+  .aruzr-timer[data-flash="timeout"] {
+    animation: none;
+  }
+
+  .aruzr-answer:not(:disabled):hover,
+  .aruzr-answer:not(:disabled):active,
+  .aruzr-cta:active,
+  .aruzr-ghost-btn:active {
+    transform: none;
+  }
+
+  .aruzr-spinner {
+    animation-duration: 2s;
+  }
+}
